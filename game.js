@@ -1,226 +1,275 @@
-const MAP_SIZE = 2000;
-const FOOD_COUNT = 180;
-const BOT_COUNT = 15;
-const TUTORIAL_STEPS = [
-  "Move to the green food",
-  "Eat food to grow bigger", 
-  "Avoid bigger creatures",
-  "Reach Level 10 to evolve into Cockroach"
-];
-const FOOD_TYPES = { seed:0x8B4513, berry:0xFF0000, bug:0x00FF00, mushroom:0xFF69B4, leaf:0x228B22 };
-const BOT_TYPES = {
-  grazer: { color:0x90EE90, aggression: 0.1, foodBias: 0.9, fleeSize: 1.5, name:"Grazer" },
-  hunter: { color:0xFF6B6B, aggression: 0.9, foodBias: 0.3, fleeSize: 2.0, name:"Hunter" },
-  coward: { color:0xFFE66D, aggression: 0.0, foodBias: 0.7, fleeSize: 1.1, name:"Coward" },
-  explorer: { color:0x4ECDC4, aggression: 0.4, foodBias: 0.5, fleeSize: 1.8, name:"Explorer" }
-};
-
-let game, player, bots = [], foods = [], cursors, joystick;
-let tutorialStep = 0, hasSeenTutorial = localStorage.getItem('tutorialDone') === '1';
-let sessionStart = 0;
-
-// PHASER CONFIG
 const config = {
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: '#2d5a2d',
-  scene: { create, update }
+  backgroundColor: '#1a4d1a',
+  scene: { preload, create, update },
+  physics: { default: 'arcade' }
 };
 
-window.onload = () => {
-  document.getElementById('highscore').innerText = parseFloat(localStorage.getItem('highscore') || 0).toFixed(1);
-  document.getElementById('btn-play').onclick = startGame;
-  document.getElementById('btn-retry').onclick = startGame;
-  document.getElementById('btn-menu').onclick = () => location.reload();
-  document.getElementById('tutorial').onclick = nextTutorialStep;
-  document.getElementById('btn-friends').onclick = () => alert("Coming in v0.2!");
-  game = new Phaser.Game(config);
-}
+const game = new Phaser.Game(config);
 
-function startGame() {
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('ui').style.display = 'block';
-  document.getElementById('gameover').style.display = 'none';
-  sessionStart = Date.now();
+// --- GAME STATE ---
+let player, bots = [], food = [], cursors, joystick = {x:0,y:0};
+let gameOver = false, score = 0, highScore = localStorage.getItem('e2e_highscore') || 0;
+let hudText, gameOverText, restartBtn;
 
-  if (!hasSeenTutorial) {
-    document.getElementById('tutorial').style.display = 'block';
-    tutorialStep = 0;
-    updateTutorial();
-  }
-  if(game.scene.scenes[0]) game.scene.scenes[0].scene.restart();
-}
+// --- EVOLUTION DATA ---
+const EVOLUTION = {
+  ant: { maxLevel: 10, next: 'cockroach', xpToNext: 10 },
+  cockroach: { maxLevel: 20, next: null, xpToNext: 20 }
+};
+
+const BOT_TYPES = {
+  hunter: { color: 0xff4444, speed: 180 },
+  coward: { color: 0xffff44, speed: 220 },
+  grazer: { color: 0x44ff44, speed: 140 },
+  explorer: { color: 0x44ffff, speed: 160 }
+};
+
+// --- FOOD TYPES ---
+const FOOD_TYPES = {
+  leaf: { color: 0x228B22 },
+  mushroom: { color: 0xD2691E },
+  bug: { color: 0x8B4513 },
+  berry: { color: 0xFF0000 },
+  seed: { color: 0xA0522D }
+};
+
+function preload() {}
 
 function create() {
-  this.cameras.main.setBounds(0, 0, MAP_SIZE, MAP_SIZE);
-  this.add.grid(0, 0, MAP_SIZE, MAP_SIZE, 100, 100, 0x000, 0.1);
-
-  // PLAYER
-  player = createEntity(MAP_SIZE/2, MAP_SIZE/2, 'player', 'ant');
-
-  // BOTS
-  bots = [];
-  const personalities = Object.keys(BOT_TYPES);
-  for(let i=0; i<BOT_COUNT; i++) {
-    const type = personalities[Math.floor(Math.random() * 4)];
-    bots.push(createEntity(Math.random()*MAP_SIZE, Math.random()*MAP_SIZE, 'bot', 'ant', type));
+  const scene = this;
+  
+  // Spawn player as ANT
+  player = createEntity(400, 300, 'player', 'ant');
+  
+  // Spawn 15 bots
+  for(let i=0; i<15; i++) {
+    const type = Phaser.Math.RND.pick(Object.keys(BOT_TYPES));
+    bots.push(createEntity(
+      Phaser.Math.Between(100, 700), 
+      Phaser.Math.Between(100, 500), 
+      'bot', 'ant', type
+    ));
   }
-
-  // FOOD
-  foods = [];
-  for(let i=0; i<FOOD_COUNT; i++) spawnFood.call(this);
-
-  // INPUT
+  
+  // Spawn 30 food
+  for(let i=0; i<30; i++) spawnFood();
+  
+  // Input
   cursors = this.input.keyboard.createCursorKeys();
-  if (this.sys.game.device.os.mobile) {
-    joystick = nipplejs.create({ zone: document.body, mode: 'static', position: { left: '15%', bottom: '15%' }, color: 'rgba(255,255,255,0.3)', size: 120 });
-  }
-}
-
-function update() {
-  if (!player.alive) return;
-  const dt = 0.016;
-
-  // PLAYER INPUT
-  let dx = 0, dy = 0;
-  if (cursors.left.isDown) dx = -1; if (cursors.right.isDown) dx = 1;
-  if (cursors.up.isDown) dy = -1; if (cursors.down.isDown) dy = 1;
-  if (joystick && joystick.data) { dx = joystick.data.vector.x; dy = joystick.data.vector.y; }
-  if (dx || dy) { const len = Math.hypot(dx, dy); player.vx = dx/len; player.vy = dy/len; } else { player.vx = 0; player.vy = 0; }
-
-  // UPDATE ALL
-  updateEntity(player, dt);
-  bots.forEach(bot => updateBot(bot, dt));
-
-  // CAMERA
-  this.cameras.main.startFollow(player.sprite, true, 0.08, 0.08);
-
-  // CHECK EVOLUTION
-  if (player.level >= 10 && player.type === 'ant') evolve(player);
-  if (player.alive) updateUI();
+  setupJoystick();
+  
+  // HUD
+  hudText = this.add.text(16, 16, '', { fontSize: '18px', fill: '#fff', backgroundColor: '#0008', padding: 8 });
+  gameOverText = this.add.text(400, 300, '', { fontSize: '32px', fill: '#ff0' }).setOrigin(0.5).setVisible(false);
+  restartBtn = this.add.text(400, 350, 'PLAY AGAIN', { fontSize: '24px', fill: '#0f0', backgroundColor: '#000' })
+   .setOrigin(0.5).setInteractive().setVisible(false)
+   .on('pointerdown', () => location.reload());
+  
+  showTutorial();
 }
 
 function createEntity(x, y, role, type, personality=null) {
-  const baseRadius = type === 'ant'? 16 : 28;
-  const color = role==='player'?0xD2691E:BOT_TYPES[personality].color;
-  const sprite = game.scene.scenes[0].add.circle(x, y, baseRadius, color).setStrokeStyle(2, 0x000);
-  return { x, y, vx:0, vy:0, sprite, role, type, personality, level:1, xp:0, size:1, speed: role==='player'?200:150+Math.random()*30, alive:true };
+  const scene = game.scene.scenes[0];
+  const color = role==='player'?0x8B4513:BOT_TYPES[personality].color;
+  
+  // --- ANT SPRITE: 3 circles + 6 legs in a Container ---
+  const tail = scene.add.circle(-10, 0, 6, color);
+  const body = scene.add.circle(0, 0, 8, color);
+  const head = scene.add.circle(10, 0, 5, color);
+  
+  const legs = [];
+  for(let i=-1;i<=1;i++){
+    legs.push(scene.add.line(0,0,-6,i*5,-14,i*8,0x000000).setLineWidth(2));
+    legs.push(scene.add.line(0,0,6,i*5,14,i*8,0x000).setLineWidth(2));
+  }
+  
+  const sprite = scene.add.container(x,y,[tail,body,head,...legs]);
+  
+  return { 
+    x, y, vx:0, vy:0, sprite, 
+    role, type, personality, 
+    level:1, xp:0, size:1, 
+    speed: role==='player'?200:BOT_TYPES[personality].speed, 
+    alive:true,
+    parts: {tail, body, head} // save parts for cockroach evolution
+  };
 }
 
-function updateEntity(e, dt) {
-  if (!e.alive) return;
-  e.x += e.vx * e.speed * dt; e.y += e.vy * e.speed * dt;
-  e.x = Phaser.Math.Clamp(e.x, 0, MAP_SIZE); e.y = Phaser.Math.Clamp(e.y, 0, MAP_SIZE);
-  e.sprite.x = e.x; e.sprite.y = e.y;
-  const radius = (e.type==='ant'?16:28) * e.size;
-  e.sprite.setRadius(radius);
-
-  // EAT FOOD
-  if (e.role!== 'food') {
-    for(let i=foods.length-1; i>=0; i--) {
-      const f = foods[i];
-      if (Phaser.Math.Distance.Between(e.x, e.y, f.x, f.y) < radius + 8) {
-        e.xp += 1; e.size += 0.04;
-        if (e.xp >= e.level * 10) { e.level++; e.xp = 0; }
-        f.sprite.destroy(); foods.splice(i,1); spawnFood.call(game.scene.scenes[0]);
-      }
-    }
+function createFood(x, y) {
+  const scene = game.scene.scenes[0];
+  const type = Phaser.Math.RND.pick(Object.keys(FOOD_TYPES));
+  const color = FOOD_TYPES[type].color;
+  let sprite;
+  
+  // --- FOOD SPRITES ---
+  if(type === 'leaf') sprite = scene.add.ellipse(0, 0, 12, 8, color);
+  else if(type === 'mushroom') {
+    sprite = scene.add.container(0,0);
+    sprite.add(scene.add.circle(0, -4, 6, color)); // cap
+    sprite.add(scene.add.rectangle(0, 2, 4, 6, 0xffffff)); // stem
   }
-
-  // PVP
-  const others = e.role==='player'?bots:[player,...bots.filter(b=>b!==e)];
-  for(const o of others) {
-    if (!o.alive) continue;
-    const dist = Phaser.Math.Distance.Between(e.x, e.y, o.x, o.y);
-    const oRadius = (o.type==='ant'?16:28) * o.size;
-    if (dist < (radius + oRadius)/2) {
-      if (e.size > o.size * 1.15) { // EAT
-        e.size += o.size * 0.2; e.xp += 2; o.alive = false; o.sprite.destroy();
-        if (o.role==='player') gameOver();
-      } else if (o.size > e.size * 1.15 && e.role==='player') { // BE EATEN
-        gameOver();
-      }
-    }
+  else if(type === 'bug') {
+    sprite = scene.add.container(0,0);
+    sprite.add(scene.add.ellipse(0, 0, 8, 4, color));
+    for(let i=-1;i<=1;i++) sprite.add(scene.add.line(0,0,-4,i*2,-6,i*3,0x000).setLineWidth(1));
   }
-}
-
-function updateBot(bot, dt) {
-  if (!bot.alive) return;
-  const p = BOT_TYPES[bot.personality];
-  let targetX = bot.x + (Math.random()-0.5)*50, targetY = bot.y + (Math.random()-0.5)*50;
-
-  // 1. FLEE if threat is close
-  const threat = [player,...bots].find(o => o!==bot && o.alive && o.size > bot.size * p.fleeSize && Phaser.Math.Distance.Between(bot.x,bot.y,o.x,o.y) < 300);
-  if (threat) {
-    const angle = Phaser.Math.Angle.Between(bot.x, bot.y, threat.x, threat.y);
-    targetX = bot.x - Math.cos(angle)*400; targetY = bot.y - Math.sin(angle)*400;
+  else if(type === 'berry') {
+    sprite = scene.add.container(0,0);
+    sprite.add(scene.add.circle(0, 0, 5, color));
+    sprite.add(scene.add.circle(0, -4, 2, 0x00ff00)); // leaf top
   }
-  // 2. HUNT if aggressive
-  else if (p.aggression > 0.5 && Math.random() < p.aggression) {
-    const prey = [player,...bots].find(o => o!==bot && o.alive && o.size < bot.size * 0.85 && Phaser.Math.Distance.Between(bot.x,bot.y,o.x,o.y) < 400);
-    if (prey) { targetX = prey.x; targetY = prey.y; }
+  else { // seed
+    sprite = scene.add.ellipse(0, 0, 6, 10, color);
   }
-  // 3. SEEK FOOD
-  else if (p.foodBias > 0.3 && Math.random() < p.foodBias) {
-    const food = foods.reduce((a,b) => Phaser.Math.Distance.Between(bot.x,bot.y,a.x,a.y) < Phaser.Math.Distance.Between(bot.x,bot.y,b.x,b.y)?a:b, foods[0]);
-    if (food) { targetX = food.x; targetY = food.y; }
-  }
-
-  const dx = targetX - bot.x, dy = targetY - bot.y;
-  const len = Math.hypot(dx, dy);
-  bot.vx = len?dx/len:0; bot.vy = len?dy/len:0;
-  updateEntity(bot, dt);
-
-  if (bot.level >= 10 && bot.type === 'ant') evolve(bot);
-}
-
-function evolve(e) {
-  e.type = 'cockroach';
-  e.speed += 40;
-  e.sprite.setFillStyle(e.role==='player'?0x333:BOT_TYPES[e.personality].color);
-  e.sprite.setStrokeStyle(3, 0xFFD700); // golden outline for evolved
+  
+  sprite.x = x; sprite.y = y;
+  return { x, y, sprite, type };
 }
 
 function spawnFood() {
-  const types = Object.keys(FOOD_TYPES);
-  const type = types[Math.floor(Math.random()*5)];
-  const sprite = this.add.circle(Math.random()*MAP_SIZE, Math.random()*MAP_SIZE, 8, FOOD_TYPES[type]).setStrokeStyle(1,0x000);
-  foods.push({x:sprite.x, y:sprite.y, sprite, type});
+  food.push(createFood(Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550)));
 }
 
-function updateUI() {
-  document.getElementById('ui-type').innerText = player.type === 'ant' ? 'Ant' : 'Cockroach';
-  document.getElementById('ui-lvl').innerText = player.level;
-  document.getElementById('ui-size').innerText = player.size.toFixed(1);
-  document.getElementById('xp-fill').style.width = Math.min(100, player.xp/(player.level*10)*100) + '%';
-}
-
-function nextTutorialStep() {
-  tutorialStep++;
-  if (tutorialStep >= TUTORIAL_STEPS.length) {
-    document.getElementById('tutorial').style.display = 'none';
-    hasSeenTutorial = true; localStorage.setItem('tutorialDone', '1');
-  } else updateTutorial();
-}
-function updateTutorial() {
-  document.getElementById('tut-step').innerText = TUTORIAL_STEPS[tutorialStep];
-}
-
-function gameOver() {
-  if(!player.alive) return;
-  player.alive = false;
-  const sessionTime = ((Date.now() - sessionStart)/1000).toFixed(0);
+function update() {
+  if(gameOver) return;
   
-  const highscore = Math.max(parseFloat(localStorage.getItem('highscore')||0), player.size);
-  localStorage.setItem('highscore', highscore);
-
-  console.log("METRICS:", { sessionSeconds: sessionTime, finalSize: player.size.toFixed(1), reachedCockroach: player.level>=10 });
-
-  document.getElementById('final-size').innerText = player.size.toFixed(1);
-  document.getElementById('final-lvl').innerText = player.level;
-  document.getElementById('final-time').innerText = sessionTime;
-  document.getElementById('gameover').style.display = 'block';
-  document.getElementById('ui').style.display = 'none';
-  document.getElementById('highscore').innerText = highscore.toFixed(1);
+  handleInput();
+  updateEntity(player);
+  bots.forEach(b => { updateAI(b); updateEntity(b); });
+  checkCollisions();
+  updateHUD();
 }
+
+function handleInput() {
+  let dx=0, dy=0;
+  if(cursors.left.isDown) dx=-1;
+  if(cursors.right.isDown) dx=1;
+  if(cursors.up.isDown) dy=-1;
+  if(cursors.down.isDown) dy=1;
+  dx += joystick.x; dy += joystick.y;
+  
+  player.vx = dx * player.speed;
+  player.vy = dy * player.speed;
+}
+
+function updateAI(bot) {
+  const dist = Phaser.Math.Distance.Between(player.x, player.y, bot.x, bot.y);
+  if(bot.personality === 'hunter' && dist < 200) {
+    bot.vx = (player.x - bot.x) * 0.05;
+    bot.vy = (player.y - bot.y) * 0.05;
+  } else if(bot.personality === 'coward' && dist < 150) {
+    bot.vx = (bot.x - player.x) * 0.05;
+    bot.vy = (bot.y - player.y) * 0.05;
+  } else {
+    bot.vx = Math.sin(Date.now()*0.001 + bot.x)*0.5;
+    bot.vy = Math.cos(Date.now()*0.001 + bot.y)*0.5;
+  }
+}
+
+function updateEntity(e) {
+  if(!e.alive) return;
+  e.x += e.vx * 0.016;
+  e.y += e.vy * 0.016;
+  e.sprite.x = e.x;
+  e.sprite.y = e.y;
+  
+  // --- MAKE IT FACE WHERE IT MOVES ---
+  if(e.vx || e.vy){
+    e.sprite.rotation = Math.atan2(e.vy, e.vx);
+  }
+  
+  // Scale with size
+  e.sprite.setScale(e.size);
+  
+  // Keep in bounds
+  e.x = Phaser.Math.Clamp(e.x, 20, 780);
+  e.y = Phaser.Math.Clamp(e.y, 20, 580);
+}
+
+function checkCollisions() {
+  // Player eats food
+  food = food.filter(f => {
+    if(Phaser.Math.Distance.Between(player.x, player.y, f.x, f.y) < 15 * player.size) {
+      f.sprite.destroy();
+      gainXP(player, 1);
+      score += 10;
+      spawnFood();
+      return false;
+    }
+    return true;
+  });
+  
+  // Player vs bots
+  bots.forEach(b => {
+    if(!b.alive) return;
+    const dist = Phaser.Math.Distance.Between(player.x, player.y, b.x, b.y);
+    const mySize = 8 * player.size;
+    const botSize = 8 * b.size;
+    if(dist < mySize + botSize) {
+      if(player.size > b.size) {
+        b.alive = false; b.sprite.destroy();
+        gainXP(player, 3);
+        score += 50;
+      } else {
+        gameOverSequence();
+      }
+    }
+  });
+}
+
+function gainXP(entity, amount) {
+  entity.xp += amount;
+  const evo = EVOLUTION[entity.type];
+  if(entity.xp >= evo.xpToNext && entity.level < evo.maxLevel) {
+    entity.level++; entity.xp = 0; entity.size += 0.15;
+    
+    // --- COCKROACH EVOLUTION ---
+    if(entity.level === 10 && evo.next) {
+      entity.type = 'cockroach';
+      // make it dark and bigger
+      entity.parts.tail.setFillStyle(0x222);
+      entity.parts.body.setFillStyle(0x222);
+      entity.parts.head.setFillStyle(0x222222);
+      entity.sprite.setScale(entity.size * 1.3);
+      showEvolveText();
+    }
+  }
+}
+
+function updateHUD() {
+  hudText.setText(`Type: ${player.type}\nLevel: ${player.level} / ${EVOLUTION[player.type].maxLevel}\nSize: ${player.size.toFixed(1)}\nXP: ${player.xp}/${EVOLUTION[player.type].xpToNext}\nScore: ${score}`);
+}
+
+function showEvolveText() {
+  const txt = game.scene.scenes[0].add.text(400, 200, 'EVOLVED TO COCKROACH!', { fontSize: '28px', fill: '#FFD700' }).setOrigin(0.5);
+  game.scene.scenes[0].time.delayedCall(2000, () => txt.destroy());
+}
+
+function showTutorial() {
+  const txt = game.scene.scenes[0].add.text(400, 300, 'Reach Level 10 to evolve into Cockroach\nClick to continue', { fontSize: '20px', fill: '#fff', align: 'center' }).setOrigin(0.5).setBackgroundColor('#000a').setPadding(16);
+  game.scene.scenes[0].input.once('pointerdown', () => txt.destroy());
+}
+
+function gameOverSequence() {
+  gameOver = true;
+  highScore = Math.max(highScore, score);
+  localStorage.setItem('e2e_highscore', highScore);
+  gameOverText.setText(`GAME OVER\nScore: ${score}`).setVisible(true);
+  restartBtn.setVisible(true);
+}
+
+function setupJoystick() {
+  const joy = document.createElement('div');
+  joy.style = 'position:fixed;bottom:40px;left:40px;width:100px;height:100px;border:2px solid #fff;border-radius:50%;opacity:0.5;z-index:1000';
+  document.body.appendChild(joy);
+  joy.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    const rect = joy.getBoundingClientRect();
+    joystick.x = (t.clientX - rect.left - 50) / 50;
+    joystick.y = (t.clientY - rect.top - 50) / 50;
+  });
+  joy.addEventListener('touchend', () => { joystick.x=0; joystick.y=0; });
+    }
