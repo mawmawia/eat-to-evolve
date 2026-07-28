@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>Eat to Evolve v0.1</title>
+<style>
+    * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; overflow: hidden; background: #1a2f1a; font-family: Arial, sans-serif; }
+  canvas { display: block; touch-action: none; }
+  
+  #ui { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 8px; font-size: 14px; z-index: 10; display: none; }
+  #xp-bar { width: 200px; height: 12px; background: #333; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+  #xp-fill { height: 100%; background: #4CAF50; width: 0%; transition: width 0.2s; }
+
+  #tutorial { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; text-align: center; z-index: 20; max-width: 400px; cursor: pointer; display: none; }
+  #tutorial h2 { color: #4CAF50; margin-top: 0; }
+  #tutorial .step { font-size: 20px; margin: 20px 0; min-height: 30px; }
+  #tutorial .hint { font-size: 12px; opacity: 0.7; margin-top: 20px; }
+
+  #gameover { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.95); padding: 40px; border-radius: 15px; text-align: center; z-index: 20; display: none; }
+  #gameover h2 { color: #ff4444; margin-top: 0; }
+  #gameover button { background: #4CAF50; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; font-weight: bold; }
+  #gameover button:hover { background: #45a049; }
+  #gameover .secondary { background: #555; }
+  #gameover .secondary:hover { background: #666; }
+
+  #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #2d5a2d 0%, #1a2f1a 100%); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+  #menu h1 { font-size: 48px; color: #4CAF50; margin: 0 0 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+  #menu .subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 30px; }
+  #menu button { background: #4CAF50; color: white; border: none; padding: 18px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin: 10px; width: 300px; font-weight: bold; transition: 0.2s; }
+  #menu button:hover { background: #45a049; transform: scale(1.05); }
+  #menu .secondary { background: #555; }
+  #menu .secondary:hover { background: #666; }
+  #menu .highscore { font-size: 18px; margin-bottom: 20px; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.2/dist/nipplejs.min.js"></script>
+</head>
+<body>
+  <div id="menu">
+    <h1>EAT TO EVOLVE</h1>
+    <div class="subtitle">Grow. Evolve. Dominate.</div>
+    <div class="highscore">High Score: <span id="highscore">0.0</span></div>
+    <button id="btn-play">🎮 PLAY</button>
+    <button id="btn-friends" class="secondary">👥 Play with Friends [Beta]</button>
+  </div>
+
+  <div id="tutorial">
+    <h2>How to Survive</h2>
+    <div class="step" id="tut-step">Loading...</div>
+    <div class="hint">Click anywhere to continue</div>
+  </div>
+
+  <div id="ui">
+    <div><b>Type:</b> <span id="ui-type">Ant</span></div>
+    <div><b>Level:</b> <span id="ui-lvl">1</span> / 10</div>
+    <div><b>Size:</b> <span id="ui-size">1.0</span></div>
+    <div><b>XP</b></div>
+    <div id="xp-bar"><div id="xp-fill"></div></div>
+  </div>
+
+  <div id="gameover">
+    <h2>YOU DIED</h2>
+    <div>Final Size: <span id="final-size">0</span></div>
+    <div>Final Level: <span id="final-lvl">0</span></div>
+    <div>Time: <span id="final-time">0</span>s</div>
+    <button id="btn-retry">PLAY AGAIN</button>
+    <button id="btn-menu" class="secondary">MAIN MENU</button>
+  </div>
+
+<script src="game.js"></script>
+</body>
+</html>
