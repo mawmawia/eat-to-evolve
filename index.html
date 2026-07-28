@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Eat to Evolve 🐜 → 🪳</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Eat to Evolve</title>
   <style>
-    body { margin: 0; background: #2a4d2a; overflow: hidden; font-family: Arial; }
-    #leaderboard { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 8px; font-size: 14px; z-index: 10; }
-    #stats { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 8px; font-size: 14px; z-index: 10; }
-    #dead { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 32px; font-weight: bold; text-shadow: 2px 2px 4px black; z-index: 10; display: none; }
+    body { margin: 0; padding: 0; overflow: hidden; background: #2d5a2d; font-family: Arial; }
+    canvas { display: block; }
+    #ui { position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; font-size: 14px; }
+    #leaderboard { position: absolute; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; font-size: 14px; }
+    #dead { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: red; font-size: 48px; display: none; }
   </style>
 </head>
 <body>
+  <div id="ui"></div>
   <div id="leaderboard"><b>Leaderboard</b><div id="lb-list"></div></div>
-  <div id="stats"></div>
-  <div id="dead">Respawning...</div>
-  <script type="module" src="/game.js"></script>
+  <div id="dead">YOU DIED</div>
+  <script type="module" src="game.js"></script>
 </body>
 </html>
