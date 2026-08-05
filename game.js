@@ -1,80 +1,112 @@
-const config = { type: Phaser.AUTO, width: window.innerWidth, height: window.innerHeight, backgroundColor: '#1a4d1a', physics: { default: 'arcade' }, scene: { preload, create, update }};
+window.onerror = (message, source, line, column) => {
+  alert(`JS CRASH\n${message}\n${source}:${line}:${column}`);
+  return true;
+};
+
+const WORLD_WIDTH = 4000;
+const WORLD_HEIGHT = 4000;
+let player, entities = [], food = [], gameOver = false;
+let foodEaten = 0, enemiesDefeated = 0;
+let cursors, shiftKey;
+
+const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: '#1a4d1a',
+    physics: { default: 'arcade' },
+    scene: { preload, create, update }
+};
+
 const game = new Phaser.Game(config);
-let player, bots = [], food = [], sfx = {}; 
-let gameOver = false, foodEaten = 0, enemiesDefeated = 0, lastMinimapUpdate = 0;
-const WORLD_WIDTH = 2400, WORLD_HEIGHT = 2400;
-let minimap, minimapGfx;
-
-const BIOMES = [
-  { name: 'grass', color: 0x1a4d1a, weight: 50, yMin: 0, yMax: 800 },
-  { name: 'rock', color: 0x4a4a4a, weight: 25, yMin: 800, yMax: 1600 },
-  { name: 'water', color: 0x1e4d6d, weight: 15, yMin: 1600, yMax: 2000 },
-  { name: 'volcano', color: 0x6d1e1e, weight: 10, yMin: 2000, yMax: 2400 }
-];
-
-function pickBiome() {
-  const totalWeight = BIOMES.reduce((sum, b) => sum + b.weight, 0);
-  let r = Phaser.Math.Between(0, totalWeight);
-  for(const biome of BIOMES) { r -= biome.weight; if(r <= 0) return biome; }
-  return BIOMES[0];
-}
 
 function preload() {
-  ['ant','lizard','bird','shark','crocodile','lion','dragon'].forEach(c => this.load.image(c, `assets/${c}.png`));
-  this.load.audio('eat', 'assets/sfx/eat.wav'); this.load.audio('xp', 'assets/sfx/xp.wav');
-  this.load.audio('hit', 'assets/sfx/hit.wav'); this.load.audio('hurt', 'assets/sfx/hurt.wav');
-  this.load.audio('evolve', 'assets/sfx/evolve.wav'); this.load.audio('levelup', 'assets/sfx/levelup.wav');
-  this.load.audio('sprint', 'assets/sfx/sprint.wav'); this.load.audio('gameover', 'assets/sfx/gameover.wav');
+    // Try to load sprites. If they 404, game still runs with circles
+    for (const type in EVOLUTIONS) {
+        this.load.image(type, `assets/${type}.png`);
+    }
 }
 
 function create() {
-  const scene = this;
-  scene.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-  scene.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-  scene.cameras.main.setDeadzone(180, 120);
+    this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    cursors = this.input.keyboard.createCursorKeys();
+    shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
-  sfx.eat = scene.sound.add('eat', {volume: 0.35}); sfx.xp = scene.sound.add('xp', {volume: 0.25});
-  sfx.hit = scene.sound.add('hit', {volume: 0.50}); sfx.hurt = scene.sound.add('hurt', {volume: 0.50});
-  sfx.evolve = scene.sound.add('evolve', {volume: 0.75}); sfx.levelup = scene.sound.add('levelup', {volume: 0.60});
-  sfx.sprint = scene.sound.add('sprint', {volume: 0.30}); sfx.gameover = scene.sound.add('gameover', {volume: 0.80});
+    player = createEntity(this, WORLD_WIDTH/2, WORLD_HEIGHT/2, "player", "ant");
+    this.cameras.main.startFollow(player.sprite, true, 0.1, 0.1);
+    addIdleAnimation(this, player, "ant");
 
-  evolveTo(scene, 'ant', WORLD_WIDTH/2, WORLD_HEIGHT/2);
-  for(let i=0; i<60; i++) spawnBot(scene);
-  for(let i=0; i<150; i++) spawnFood(scene);
-  this.cursors = this.input.keyboard.createCursorKeys();
-  setupControls();
-  createMinimap(scene);
-  createGameOverPanel(scene);
+    for(let i = 0; i < 100; i++) { spawnFood(this); }
+    for(let i = 0; i < 30; i++) { spawnBot(this); }
+    createGameOverPanel(this);
+    updateHUD();
 }
 
-function playSfx(name) { // Anti machine-gun
-  const sound = sfx[name]; if (!sound) return;
-  if (sound.isPlaying) { sound.stop(); }
-  sound.play();
+function update() {
+    if(gameOver) return;
+    handlePlayerMovement(this);
+    updateEntities(this);
+    checkCollisions(this);
 }
 
-function update(time, delta) {
-  if(gameOver) return;
-  const dt = delta / 1000;
-  handleInput();
-  updateEntity(player, dt);
-  bots.forEach(b => { if(b.alive) {updateAI(b, dt); updateEntity(b, dt);} });
-  checkCollisions();
-  updateHUD();
-  if(time - lastMinimapUpdate > 200) { updateMinimap(game.scene.scenes[0]); lastMinimapUpdate = time; }
+function handlePlayerMovement(scene) {
+    const speed = shiftKey.isDown? player.speed * 1.8 : player.speed;
+    player.vx = 0; player.vy = 0;
+    if (cursors.left.isDown || cursors.A.isDown) player.vx = -speed;
+    if (cursors.right.isDown || cursors.D.isDown) player.vx = speed;
+    if (cursors.up.isDown || cursors.W.isDown) player.vy = -speed;
+    if (cursors.down.isDown || cursors.S.isDown) player.vy = speed;
+    player.sprite.x += player.vx * 0.016; player.sprite.y += player.vy * 0.016;
+    player.sprite.x = Phaser.Math.Clamp(player.sprite.x, 0, WORLD_WIDTH);
+    player.sprite.y = Phaser.Math.Clamp(player.sprite.y, 0, WORLD_HEIGHT);
 }
 
-// All other functions: updateEntity, checkCollisions, gainXP, spawnBot, spawnFood, createMinimap, updateMinimap, evolveTo, hitFlash, showFloatingXP, showLevelUp, createGameOverPanel
-// are the same as v4.5.1 with playSfx() calls added:
-function gainXP(amount, source) {
-  player.xp += amount;
-  if(source === 'food') { foodEaten++; playSfx("eat"); }
-  if(source === 'enemy') { enemiesDefeated++; player.size += 0.03; }
-  playSfx("xp"); showFloatingXP(game.scene.scenes[0], player.x, player.y - 30, amount);
-  const oldLevel = player.level;
-  while (player.xp >= EVOLUTIONS[player.type].xpToNext && EVOLUTIONS[player.type].next) {
-    const evo = EVOLUTIONS[player.type]; player.xp -= evo.xpToNext; player.level++;
-    evolveTo(game.scene.scenes[0], evo.next, player.x, player.y);
-  }
-  if(player.level > oldLevel) { playSfx("levelup"); showLevelUp(game.scene.scenes[0]); }
+function spawnFood(scene) {
+    const x = Phaser.Math.Between(0, WORLD_WIDTH);
+    const y = Phaser.Math.Between(0, WORLD_HEIGHT);
+    const f = scene.add.circle(x, y, 8, 0x00ff00).setDepth(5);
+    food.push({x, y, sprite: f});
 }
+
+function spawnBot(scene) {
+    const types = Object.keys(EVOLUTIONS);
+    const personalities = Object.keys(BOT_TYPES);
+    const type = Phaser.Math.RND.pick(types);
+    const personality = Phaser.Math.RND.pick(personalities);
+    const x = Phaser.Math.Between(0, WORLD_WIDTH);
+    const y = Phaser.Math.Between(0, WORLD_HEIGHT);
+    const bot = createEntity(scene, x, y, "bot", type, personality);
+    addIdleAnimation(scene, bot, type);
+    entities.push(bot);
+}
+
+function updateEntities(scene) {
+    entities.forEach(e => {
+        if(!e.alive) return;
+        e.sprite.x += Math.sin(Date.now() * 0.001 + e.x) * 0.5;
+        e.sprite.y += Math.cos(Date.now() * 0.001 + e.y) * 0.5;
+    });
+}
+
+function checkCollisions(scene) {
+    food = food.filter(f => {
+        if(Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, f.x, f.y) < 25) {
+            f.sprite.destroy();
+            player.xp += 1; foodEaten++;
+            showFloatingXP(scene, f.x, f.y, 1);
+            if(player.xp >= EVOLUTIONS[player.type].xpToNext && EVOLUTIONS[player.type].next) {
+                evolveTo(scene, EVOLUTIONS[player.type].next, player.sprite.x, player.sprite.y);
+            }
+            updateHUD();
+            return false;
+        }
+        return true;
+    });
+}
+
+function updateHUD() {
+    document.getElementById('hud').innerHTML =
+        `Level: ${player.level} | ${player.type.toUpperCase()}<br>XP: ${player.xp}/${EVOLUTIONS[player.type].xpToNext}<br>Food: ${foodEaten} | Kills: ${enemiesDefeated}`;
+}
+
+function playSfx(name) { /* placeholder */ }
