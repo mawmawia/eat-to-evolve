@@ -3,22 +3,18 @@ function createEvolutionParticles(scene, x, y, color) {
     const angle = (Math.PI * 2 * i) / 40;
     const speed = Phaser.Math.Between(100, 250);
     const p = scene.add.circle(x, y, 4, color).setDepth(50);
-    scene.tweens.add({ targets: p, x: x + Math.cos(angle) * speed, y: y + Math.cos(angle) * speed, alpha: 0, scale: 0.2, duration: 600, ease: 'Power2', onComplete: () => p.destroy() });
+    scene.tweens.add({ targets: p, x: x + Math.cos(angle) * speed, y: y + Math.sin(angle) * speed, alpha: 0, scale: 0.2, duration: 600, ease: 'Power2', onComplete: () => p.destroy() });
   }
 }
-
 function showFloatingXP(scene, x, y, amount) {
   const txt = scene.add.text(x, y, `+${amount} XP`, { fontSize: "16px", fontWeight: "bold", color: "#ffff00", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100);
   scene.tweens.add({ targets: txt, y: y - 50, alpha: 0, scale: 1.2, duration: 800, ease: 'Power1', onComplete: () => txt.destroy() });
 }
-
 function hitFlash(sprite) { sprite.setTint(0xff0000); sprite.scene.time.delayedCall(100, () => sprite.clearTint()); }
-
 function showLevelUp(scene) {
   const txt = scene.add.text(player.x, player.y - 80, "LEVEL UP!", { fontSize: "24px", color: "#00ff00", stroke: "#000", strokeThickness: 5 }).setOrigin(0.5).setDepth(100);
   scene.tweens.add({ targets: txt, y: txt.y - 40, alpha: 0, duration: 900, onComplete: () => txt.destroy() });
 }
-
 function createGameOverPanel(scene) {
   window.gameOverSequence = () => {
     gameOver = true; playSfx("gameover");
@@ -29,14 +25,11 @@ function createGameOverPanel(scene) {
     btn.on('pointerdown', () => window.location.reload());
   }
 }
-
 function evolveTo(scene, newType, x, y) {
   const evo = EVOLUTIONS[newType];
   const oldData = player? {xp: player.xp, size: player.size, level: player.level} : {};
   if (player && player.sprite) {
-    playSfx("evolve");
-    scene.cameras.main.flash(250, 255, 255, 255);
-    scene.cameras.main.shake(300, 0.01);
+    playSfx("evolve"); scene.cameras.main.flash(250, 255, 255, 255); scene.cameras.main.shake(300, 0.01);
     const ring = scene.add.circle(x, y, 10, 0xffffff, 0).setStrokeStyle(8, evo.color);
     scene.tweens.add({ targets: ring, scale: 10, alpha: 0, duration: 600, ease: 'Power2', onComplete: () => ring.destroy() });
     createEvolutionParticles(scene, x, y, evo.color);
