@@ -5,18 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Evolution.io</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #000; }
+    body { margin: 0; overflow: hidden; background: #1a4d1a; }
     #hud { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; font-size: 18px; text-shadow: 2px 2px 2px black; z-index: 10; }
     #controls { position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-family: Arial; z-index: 10; }
   </style>
-  <!-- PHASER CDN -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 </head>
 <body>
   <div id="hud"></div>
   <div id="controls">WASD / Arrows to Move | SHIFT to Sprint</div>
-
-  <!-- LOAD ORDER MATTERS -->
   <script src="creatures.js"></script>
   <script src="effects.js"></script>
   <script src="game.js"></script>
