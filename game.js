@@ -7,7 +7,7 @@ const WORLD_WIDTH = 4000;
 const WORLD_HEIGHT = 4000;
 let player, entities = [], food = [], gameOver = false;
 let foodEaten = 0, enemiesDefeated = 0;
-let cursors, shiftKey;
+let cursors, wasd, shiftKey; // added wasd
 
 const config = {
     type: Phaser.AUTO,
@@ -21,7 +21,7 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-    // Try to load sprites. If they 404, game still runs with circles
+    // Try to load sprites. If they 404, game still runs with circles from creatures.js fallback
     for (const type in EVOLUTIONS) {
         this.load.image(type, `assets/${type}.png`);
     }
@@ -29,7 +29,10 @@ function preload() {
 
 function create() {
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    
+    // FIX: Arrow keys + WASD separately
     cursors = this.input.keyboard.createCursorKeys();
+    wasd = this.input.keyboard.addKeys('W,S,A,D'); // THIS WAS MISSING
     shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
     player = createEntity(this, WORLD_WIDTH/2, WORLD_HEIGHT/2, "player", "ant");
@@ -39,7 +42,7 @@ function create() {
     for(let i = 0; i < 100; i++) { spawnFood(this); }
     for(let i = 0; i < 30; i++) { spawnBot(this); }
     createGameOverPanel(this);
-    updateHUD();
+    updateHUD(); // If this runs, HUD will appear
 }
 
 function update() {
@@ -50,13 +53,17 @@ function update() {
 }
 
 function handlePlayerMovement(scene) {
-    const speed = shiftKey.isDown? player.speed * 1.8 : player.speed;
+    const speed = shiftKey.isDown ? player.speed * 1.8 : player.speed;
     player.vx = 0; player.vy = 0;
-    if (cursors.left.isDown || cursors.A.isDown) player.vx = -speed;
-    if (cursors.right.isDown || cursors.D.isDown) player.vx = speed;
-    if (cursors.up.isDown || cursors.W.isDown) player.vy = -speed;
-    if (cursors.down.isDown || cursors.S.isDown) player.vy = speed;
-    player.sprite.x += player.vx * 0.016; player.sprite.y += player.vy * 0.016;
+    
+    // FIXED: Use both cursors and wasd
+    if (cursors.left.isDown || wasd.A.isDown) player.vx = -speed;
+    if (cursors.right.isDown || wasd.D.isDown) player.vx = speed;
+    if (cursors.up.isDown || wasd.W.isDown) player.vy = -speed;
+    if (cursors.down.isDown || wasd.S.isDown) player.vy = speed;
+    
+    player.sprite.x += player.vx * 0.016; 
+    player.sprite.y += player.vy * 0.016;
     player.sprite.x = Phaser.Math.Clamp(player.sprite.x, 0, WORLD_WIDTH);
     player.sprite.y = Phaser.Math.Clamp(player.sprite.y, 0, WORLD_HEIGHT);
 }
