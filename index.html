@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Evolution.io</title>
+  <title>Eat to Evolve v5</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #1a4d1a; }
+    body { margin: 0; overflow: hidden; background: #1a4d1a; touch-action: none; }
     #hud { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; font-size: 18px; text-shadow: 2px 2px 2px black; z-index: 10; }
-    #controls { position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-family: Arial; z-index: 10; }
+    #joystick { position: absolute; bottom: 80px; left: 30px; width: 120px; height: 120px; background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; z-index: 20; }
+    #stick { position: absolute; width: 50px; height: 50px; background: rgba(255,255,255,0.5); border-radius: 50%; left: 35px; top: 35px; transition: 0.05s; }
+    .skillBtn { position: absolute; bottom: 80px; width: 80px; height: 80px; background: rgba(0,0,0,0.5); border: 3px solid white; border-radius: 50%; z-index: 20; color: white; font-size: 32px; display: flex; align-items: center; justify-content: center; }
+    #skill1 { right: 130px; }
+    #skill2 { right: 30px; }
+    #sprintBtn { position: absolute; bottom: 180px; right: 30px; width: 70px; height: 70px; background: rgba(255,0,0,0.5); border: 3px solid white; border-radius: 50%; z-index: 20; color: white; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+    .cooldown { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.7); border-radius: 50%; top: 0; left: 0; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 </head>
 <body>
   <div id="hud"></div>
-  <div id="controls">WASD / Arrows to Move | SHIFT to Sprint</div>
+  <div id="joystick"><div id="stick"></div></div>
+  <div id="skill1" class="skillBtn">🍃<div class="cooldown" id="cd1"></div></div>
+  <div id="skill2" class="skillBtn">🧪<div class="cooldown" id="cd2"></div></div>
+  <div id="sprintBtn">SPRINT</div>
   <script src="creatures.js"></script>
   <script src="effects.js"></script>
   <script src="game.js"></script>
