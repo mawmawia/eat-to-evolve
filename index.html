@@ -10,18 +10,55 @@
 body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); display:flex; justify-content:center; align-items:center; height:100vh; font-family:'Fredoka',Arial,sans-serif; overflow:hidden; }
 #gameContainer{ position:relative; }
 
-/* BOARD: 240 inner + 16 border = 256 */
+/* =========================
+   BOOT / LOADING SCREEN
+   ========================= */
+#loadingScreen{
+  position:fixed; inset:0;
+  background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  z-index:1000; color:#fff; text-align:center;
+  animation:loadingFadeOut.4s ease 1.2s forwards;
+}
+.loadingDragon{ font-size:70px; animation:loadingBounce.7s infinite alternate; }
+.loadingTitle{ margin-top:8px; font-size:30px; font-weight:700; text-shadow:0 4px 8px rgba(0,0,0,.3); }
+.loadingText{ margin-top:12px; font-size:15px; opacity:.85; }
+@keyframes loadingBounce{ from{ transform:translateY(0) scale(1); } to{ transform:translateY(-10px) scale(1.08); } }
+@keyframes loadingFadeOut{ to{ opacity:0; visibility:hidden; pointer-events:none; } }
+
+/* =========================
+   TITLE SCREEN
+   ========================= */
+#titleScreen{
+  position:fixed; inset:0;
+  background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  z-index:900; color:#fff; text-align:center; padding:20px;
+}
+.titleLogo{ font-size:76px; line-height:1; margin-bottom:8px; filter:drop-shadow(0 6px 5px rgba(0,0,0,.3)); animation:titleBounce 1.2s ease-in-out infinite alternate; }
+@keyframes titleBounce{ from{ transform:translateY(0) rotate(-3deg); } to{ transform:translateY(-8px) rotate(3deg); } }
+#titleScreen h1{ margin:0; font-size:46px; line-height:.9; color:#FFD700; text-shadow: 0 4px 0 #c67c00, 0 6px 10px rgba(0,0,0,.35); }
+.evolutionLine{ margin-top:28px; font-size:24px; letter-spacing:1px; text-shadow:0 3px 5px rgba(0,0,0,.4); line-height:1.4; }
+.titleTagline{ margin-top:18px; font-size:14px; font-weight:700; letter-spacing:1px; opacity:.9; }
+#startBtn{
+  margin-top:35px; padding:16px 55px; font-size:25px; font-family:'Fredoka',Arial,sans-serif;
+  background:linear-gradient(#FFD700,#FFA500); color:#5d3a00; border:none; border-radius:20px;
+  box-shadow:0 7px #c67c00; font-weight:700; cursor:pointer; transition:transform.1s;
+}
+#startBtn:active{ transform:translateY(5px); box-shadow:0 2px #c67c00; }
+.versionText{ position:absolute; bottom:18px; font-size:11px; opacity:.5; }
+
+/* BOARD */
 #game{ background:linear-gradient(180deg,#3a7d2a 0%,#2a5d1a 100%); border:8px solid #fff; border-radius:24px; position:relative; touch-action:none; width:256px; height:336px; box-shadow:0 10px 40px rgba(0,0,0,.4); overflow:hidden; }
 #game::before{ content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px); background-size:40px 40px; border-radius:16px; pointer-events:none; }
 
-/* POSITION WITH LEFT/TOP. ANIMATE WITH TRANSFORM */
 .cell{ position:absolute; width:36px; height:36px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.5); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 4px 8px rgba(0,0,0,.3); border:3px solid rgba(255,255,255,.2); z-index:2; transition: left.15s linear, top.15s linear; }
 .cell.flash{ animation:flash.3s; z-index:3; }
 .cell.merge{ animation:mergePop.3s; z-index:4; }
 @keyframes flash{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
 @keyframes mergePop{ 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
 
-/* V0.7.5 FIX: LIFTED TO -95px SO ARROWS ARE VISIBLE */
+/* V0.7.5 FIX */
 #spawnChoice{ position:absolute; top:-95px; left:8px; width:240px; text-align:center; color:#FFD700; font-size:14px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,.5); z-index:20; }
 #nextEmojiBig{ font-size:40px; display:block; line-height:1; margin-bottom:4px; }
 #spawnLanes{ width:240px; display:grid; grid-template-columns:repeat(6, 40px); gap:0; }
@@ -35,7 +72,7 @@ body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); disp
 .scorePopup{ position:absolute; color:#FFD700; font-weight:700; font-size:20px; pointer-events:none; animation:floatUp.8s forwards; text-shadow:0 2px 4px rgba(0,0,.5); z-index:30; }
 @keyframes floatUp{ from{ opacity:1; transform:translateY(0) scale(1); } to{ opacity:0; transform:translateY(-40px) scale(1.4); } }
 
-#tutorial{ position:fixed; inset:0; background:rgba(0,0,0,.72); display:flex; justify-content:center; align-items:center; z-index:500; padding:20px; }
+#tutorial{ position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; justify-content:center; align-items:center; z-index:500; padding:20px; }
 #tutorialCard{ width:min(330px,90vw); background:#fff; color:#234; border-radius:24px; padding:22px; text-align:center; }
 #tutorialCard h2{ margin:0 0 8px; color:#2a5d1a; font-size:27px; }
 .tutorialStep{ display:flex; align-items:center; gap:12px; text-align:left; margin:12px 0; font-size:15px; }
@@ -43,12 +80,33 @@ body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); disp
 #tutorialBtn{ margin-top:10px; padding:13px 30px; font-size:19px; font-family:'Fredoka'; background:linear-gradient(#FFD700,#FFA500); color:#5d3a00; border:none; border-radius:18px; box-shadow:0 5px #c67c00; font-weight:700; }
 
 #gameOverScreen{ position:absolute; inset:0; background:rgba(0,0,0,.82); display:none; z-index:100; flex-direction:column; justify-content:center; align-items:center; color:#fff; text-align:center; padding:20px; }
-#restartBtn{ padding:16px 36px; font-size:22px; font-family:'Fredoka'; background:linear-gradient(#FFD700,#FFA500); color:#5d3a00; border:none; border-radius:20px; box-shadow:0 6px #c67c00; font-weight:700; cursor:pointer; margin-top:20px; }
+#restartBtn, #shareBtn{ padding:14px 32px; font-size:20px; font-family:'Fredoka'; background:linear-gradient(#FFD700,#FFA500); color:#5d3a00; border:none; border-radius:20px; box-shadow:0 6px #c67c00; font-weight:700; cursor:pointer; margin-top:14px; width:220px; }
+#shareBtn{ background:linear-gradient(#25D366,#128C7E); color:#fff; box-shadow:0 6px #0b6b5a; }
 .victoryTitle{ font-size:30px; color:#FFD700; margin-bottom:10px; }
 </style>
 </head>
 <body>
 
+<!-- BOOT LOADING -->
+<div id="loadingScreen">
+  <div class="loadingDragon">🐜</div>
+  <div class="loadingTitle">EAT TO EVOLVE</div>
+  <div class="loadingText">Loading...</div>
+</div>
+
+<!-- TITLE SCREEN -->
+<div id="titleScreen">
+  <div class="titleLogo">🐜</div>
+  <h1>EAT TO<br>EVOLVE</h1>
+  <div class="evolutionLine">
+    🐜 → 🪳 → 🦎 → 🐦<br>🐊 → 🦁 → 🐲
+  </div>
+  <div class="titleTagline">MERGE • EVOLVE • REACH THE DRAGON</div>
+  <button id="startBtn">PLAY</button>
+  <div class="versionText">v0.7.6</div>
+</div>
+
+<!-- TUTORIAL -->
 <div id="tutorial">
   <div id="tutorialCard">
     <h2>🐜 Eat to Evolve</h2>
@@ -65,7 +123,11 @@ body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); disp
   <div id="game">
     <div id="ui">Score: 0<br>Best: 0<br><div id="dex">Progress</div></div>
     <div id="evolvePopup"></div>
-    <div id="gameOverScreen"><div id="gameOverText"></div><button id="restartBtn">PLAY AGAIN</button></div>
+    <div id="gameOverScreen">
+      <div id="gameOverText"></div>
+      <button id="shareBtn">📤 SHARE SCORE</button>
+      <button id="restartBtn">PLAY AGAIN</button>
+    </div>
   </div>
 </div>
 
@@ -73,6 +135,7 @@ body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); disp
 const GRID_SIZE = 40;
 const COLS = 6;
 const ROWS = 8;
+const GAME_URL = window.location.href; // link to share
 const TIERS = [
   {name:"Ant", emoji:"🐜", color:"#8B4513", score:2},
   {name:"Cockroach", emoji:"🪳", color:"#4a2c17", score:4},
@@ -131,18 +194,13 @@ function pickNextTier(){
 
 function dropCreature(col){
   if(processing || board[0][col]) return;
-  processing = true;
-  setupColumns(true);
-
+  processing = true; setupColumns(true);
   let targetY = ROWS-1;
   while(targetY >= 0 && board[targetY][col]) targetY--;
   if(targetY < 0) { processing = false; setupColumns(false); return; }
-
   let newCell = makeCell(col, 0, nextTier);
-  board[0][col] = newCell;
-  turns++; turnCount++;
-  render();
-  animateFall(newCell, targetY, () => { processBoard(); });
+  board[0][col] = newCell; turns++; turnCount++;
+  render(); animateFall(newCell, targetY, () => { processBoard(); });
   nextTier = pickNextTier();
 }
 
@@ -151,16 +209,9 @@ function animateFall(cell, targetY, onDone){
     let currentY = cell.y;
     if(currentY >= targetY) { onDone(); return; }
     if(board[currentY + 1][cell.x]) { onDone(); return; }
-
-    board[currentY][cell.x] = null;
-    cell.y = currentY + 1;
-    board[currentY + 1][cell.x] = cell;
-
+    board[currentY][cell.x] = null; cell.y = currentY + 1; board[currentY + 1][cell.x] = cell;
     let el = document.getElementById(`cell-${cell.id}`);
-    if(el) {
-      el.style.left = (cell.x * GRID_SIZE + 2) + 'px';
-      el.style.top = (cell.y * GRID_SIZE + 2) + 'px';
-    }
+    if(el) { el.style.left = (cell.x * GRID_SIZE + 2) + 'px'; el.style.top = (cell.y * GRID_SIZE + 2) + 'px'; }
     setTimeout(fallStep, 150);
   };
   setTimeout(fallStep, 150);
@@ -173,43 +224,28 @@ function processBoard(){
       if(board[y][x]){
         let ny = y;
         while(ny+1 < ROWS &&!board[ny+1][x]) ny++;
-        if(ny!== y){
-          board[ny][x] = board[y][x];
-          board[ny][x].y = ny;
-          board[y][x] = null;
-          moved = true;
-        }
+        if(ny!== y){ board[ny][x] = board[y][x]; board[ny][x].y = ny; board[y][x] = null; moved = true; }
       }
     }
   }
   if(moved){ updateDOMPositions(); setTimeout(processBoard, 150); return; }
-
   let merges = findMerges();
   if(merges.length > 0){ executeMerge(merges[0], () => processBoard()); return; }
-
   processing = false;
   if(pendingVictory){ pendingVictory = false; showVictory(); return; }
-  setupColumns(false);
-  checkGameOver();
+  setupColumns(false); checkGameOver();
 }
 
 function executeMerge({survivor, removed}, onDone){
   document.getElementById(`cell-${survivor.id}`)?.classList.add('flash');
   document.getElementById(`cell-${removed.id}`)?.classList.add('flash');
-
   setTimeout(() => {
-    board[removed.y][removed.x] = null;
-    let oldTier = survivor.tier;
-    survivor.tier++;
-    unlocked[survivor.tier] = 1;
-
+    board[removed.y][removed.x] = null; let oldTier = survivor.tier; survivor.tier++; unlocked[survivor.tier] = 1;
     if(!analytics.first_merge){ logEvent("first_merge",{ time: Date.now() - analytics.sessionStart }); }
-
     if(survivor.tier === TIERS.length-1){
       dragonCount++; pendingVictory = true; updateScore(TIERS[survivor.tier].score);
     } else {
-      combo++;
-      let multiplier = dragonCount > 0? 2 : 1;
+      combo++; let multiplier = dragonCount > 0? 2 : 1;
       let baseScore = TIERS[survivor.tier].score * multiplier;
       let comboBonus = combo * 10 * multiplier;
       updateScore(baseScore + comboBonus);
@@ -217,11 +253,7 @@ function executeMerge({survivor, removed}, onDone){
       showPopup(`${TIERS[oldTier].emoji} + ${TIERS[oldTier].emoji} → ${TIERS[survivor.tier].emoji}`);
     }
     document.getElementById(`cell-${survivor.id}`)?.classList.add('merge');
-
-    setTimeout(() => {
-      render();
-      setTimeout(onDone, 100);
-    }, 300);
+    setTimeout(() => { render(); setTimeout(onDone, 100); }, 300);
   }, 300);
 }
 
@@ -254,8 +286,7 @@ function render(){
       let c = board[y][x];
       if(!c) continue;
       let el = document.createElement('div');
-      el.className = 'cell';
-      el.id = `cell-${c.id}`;
+      el.className = 'cell'; el.id = `cell-${c.id}`;
       el.style.left = (c.x * GRID_SIZE + 2) + 'px';
       el.style.top = (c.y * GRID_SIZE + 2) + 'px';
       el.style.background = TIERS[c.tier].color;
@@ -273,10 +304,7 @@ function updateDOMPositions(){
       let c = board[y][x];
       if(!c) continue;
       let el = document.getElementById(`cell-${c.id}`);
-      if(el){
-        el.style.left = (c.x * GRID_SIZE + 2) + 'px';
-        el.style.top = (c.y * GRID_SIZE + 2) + 'px';
-      }
+      if(el){ el.style.left = (c.x * GRID_SIZE + 2) + 'px'; el.style.top = (c.y * GRID_SIZE + 2) + 'px'; }
     }
   }
 }
@@ -298,11 +326,39 @@ function checkGameOver(){
   }
 }
 
-document.getElementById('tutorialBtn').onclick=()=>{ document.getElementById('tutorial').style.display='none'; localStorage.setItem('eatEvolveTutorialSeen','1'); };
-if(localStorage.getItem('eatEvolveTutorialSeen')){ document.getElementById('tutorial').style.display='none'; }
-document.getElementById('restartBtn').onclick=()=>{ logEvent("play_again"); startGame(); };
+/* =========================
+   START / INTRO FLOW + SHARE
+   ========================= */
+const titleScreen = document.getElementById('titleScreen');
+const tutorial = document.getElementById('tutorial');
 
-startGame();
+document.getElementById('startBtn').onclick = () => {
+  titleScreen.style.display = 'none';
+  if(!localStorage.getItem('eatEvolveTutorialSeen')){
+    tutorial.style.display = 'flex';
+  }else{
+    startGame();
+  }
+};
+
+document.getElementById('tutorialBtn').onclick = () => {
+  tutorial.style.display = 'none';
+  localStorage.setItem('eatEvolveTutorialSeen','1');
+  startGame();
+};
+
+document.getElementById('restartBtn').onclick = () => { logEvent("play_again"); startGame(); };
+
+document.getElementById('shareBtn').onclick = () => {
+  const shareText = `I scored ${score} in Eat to Evolve! 🐜→🐲 Can you beat me?`;
+  if(navigator.share){
+    navigator.share({ title: "Eat to Evolve", text: shareText, url: GAME_URL });
+  }else{
+    navigator.clipboard.writeText(`${shareText}\n${GAME_URL}`);
+    alert("Link copied! Share it with friends.");
+  }
+  logEvent("share_score",{ score });
+};
 </script>
 </body>
 </html>
