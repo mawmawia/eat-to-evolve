@@ -14,15 +14,15 @@ body{ margin:0; background:linear-gradient(180deg,#4a90e2 0%,#357ABD 100%); disp
 #game{ background:linear-gradient(180deg,#3a7d2a 0%,#2a5d1a 100%); border:8px solid #fff; border-radius:24px; position:relative; touch-action:none; width:256px; height:336px; box-shadow:0 10px 40px rgba(0,0,0,.4); overflow:hidden; }
 #game::before{ content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px); background-size:40px 40px; border-radius:16px; pointer-events:none; }
 
-/* FIX 2 + 3: POSITION WITH LEFT/TOP. ANIMATE WITH TRANSFORM */
-.cell{ position:absolute; width:36px; height:36px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.5); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 4px 8px rgba(0,0,0,.3); border:3px solid rgba(255,255,255,.2); z-index:2; transition: left.15s linear, top.15s linear; } /* fall uses left/top */
+/* POSITION WITH LEFT/TOP. ANIMATE WITH TRANSFORM */
+.cell{ position:absolute; width:36px; height:36px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.5); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 4px 8px rgba(0,0,0,.3); border:3px solid rgba(255,255,255,.2); z-index:2; transition: left.15s linear, top.15s linear; }
 .cell.flash{ animation:flash.3s; z-index:3; }
 .cell.merge{ animation:mergePop.3s; z-index:4; }
 @keyframes flash{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-@keyframes mergePop{ 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} } /* scale only, no translate */
+@keyframes mergePop{ 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
 
-/* FIX 1: ARROWS SHIFTED 8px RIGHT TO MATCH BORDER */
-#spawnChoice{ position:absolute; top:-55px; left:8px; width:240px; text-align:center; color:#FFD700; font-size:14px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,.5); z-index:20; }
+/* V0.7.5 FIX: LIFTED TO -95px SO ARROWS ARE VISIBLE */
+#spawnChoice{ position:absolute; top:-95px; left:8px; width:240px; text-align:center; color:#FFD700; font-size:14px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,.5); z-index:20; }
 #nextEmojiBig{ font-size:40px; display:block; line-height:1; margin-bottom:4px; }
 #spawnLanes{ width:240px; display:grid; grid-template-columns:repeat(6, 40px); gap:0; }
 .colBtn{ width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; background:rgba(0,0,0,.4); border-radius:10px; cursor:pointer; border:2px solid #666; transition:transform.1s; color:#fff; }
@@ -141,12 +141,11 @@ function dropCreature(col){
   let newCell = makeCell(col, 0, nextTier);
   board[0][col] = newCell;
   turns++; turnCount++;
-  render(); // Create DOM once
+  render();
   animateFall(newCell, targetY, () => { processBoard(); });
   nextTier = pickNextTier();
 }
 
-/* FIX 2: TRUE FALL - MOVE SAME DOM ELEMENT, NO RENDER MID-ANIM */
 function animateFall(cell, targetY, onDone){
   const fallStep = () => {
     let currentY = cell.y;
@@ -159,7 +158,7 @@ function animateFall(cell, targetY, onDone){
 
     let el = document.getElementById(`cell-${cell.id}`);
     if(el) {
-      el.style.left = (cell.x * GRID_SIZE + 2) + 'px'; // Use left/top, not transform
+      el.style.left = (cell.x * GRID_SIZE + 2) + 'px';
       el.style.top = (cell.y * GRID_SIZE + 2) + 'px';
     }
     setTimeout(fallStep, 150);
@@ -167,7 +166,6 @@ function animateFall(cell, targetY, onDone){
   setTimeout(fallStep, 150);
 }
 
-/* ===== SEQUENTIAL PHYSICS ===== */
 function processBoard(){
   let moved = false;
   for(let x=0; x<COLS; x++){
@@ -184,7 +182,7 @@ function processBoard(){
       }
     }
   }
-  if(moved){ updateDOMPositions(); setTimeout(processBoard, 150); return; } // Only move DOM, don't recreate
+  if(moved){ updateDOMPositions(); setTimeout(processBoard, 150); return; }
 
   let merges = findMerges();
   if(merges.length > 0){ executeMerge(merges[0], () => processBoard()); return; }
@@ -221,7 +219,7 @@ function executeMerge({survivor, removed}, onDone){
     document.getElementById(`cell-${survivor.id}`)?.classList.add('merge');
 
     setTimeout(() => {
-      render(); // NOW safe to recreate DOM
+      render();
       setTimeout(onDone, 100);
     }, 300);
   }, 300);
@@ -249,8 +247,7 @@ function findMerges(){
   return merges;
 }
 
-/* ===== RENDER ===== */
-function render(){ // Full recreate. Only called when settled.
+function render(){
   gameEl.querySelectorAll('.cell').forEach(el=>el.remove());
   for(let y=0; y<ROWS; y++){
     for(let x=0; x<COLS; x++){
@@ -259,7 +256,7 @@ function render(){ // Full recreate. Only called when settled.
       let el = document.createElement('div');
       el.className = 'cell';
       el.id = `cell-${c.id}`;
-      el.style.left = (c.x * GRID_SIZE + 2) + 'px'; // FIX 3: Position with left/top
+      el.style.left = (c.x * GRID_SIZE + 2) + 'px';
       el.style.top = (c.y * GRID_SIZE + 2) + 'px';
       el.style.background = TIERS[c.tier].color;
       el.innerText = TIERS[c.tier].emoji;
@@ -270,7 +267,7 @@ function render(){ // Full recreate. Only called when settled.
   document.getElementById('ui').innerHTML = `Score: ${score}<br>Best: ${highScore}<br><div id="dex">${getDexHTML()}</div>`;
 }
 
-function updateDOMPositions(){ // Cheap update during gravity
+function updateDOMPositions(){
   for(let y=0; y<ROWS; y++){
     for(let x=0; x<COLS; x++){
       let c = board[y][x];
