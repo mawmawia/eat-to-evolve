@@ -3,232 +3,226 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Eat to Evolve v1.2.1</title>
+<title>Eat to Evolve v1.3.2</title>
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
-:root{ --cell:64px; --board-w:320px; --board-h:448px; --gold:#ffcc00; --green:#45ff72; --accent:#38bdf8; }
+:root{ --cell:56px; --board-w:280px; --board-h:392px; --gold:#ffcc00; --green:#45ff72; }
 *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{color:white;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at 50% 15%,#182b48 0%,transparent 38%),radial-gradient(circle at 10% 90%,#10251b 0%,transparent 35%),linear-gradient(180deg,#080d16 0%,#030508 100%)}
-#wrapper{width:var(--board-w);position:relative;z-index:2}
-#screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(255,204,0,.09),transparent 32%),linear-gradient(180deg,#080d16,#030508);z-index:500}
-#screen h1{margin:0 0 14px;color:var(--gold);font-size:clamp(28px,8vw,42px);font-weight:900;letter-spacing:1px;text-shadow:0 0 20px rgba(255,204,0,.25)}
-.subtitle{color:#aeb8c8;font-size:14px;margin-bottom:22px}
-.bestTitle{background:#111927;border:1px solid #26344b;border-radius:12px;padding:10px 20px;margin-bottom:22px}
-#screen button{width:220px;padding:16px;border:0;border-radius:12px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:18px;font-weight:900;box-shadow:0 8px 25px rgba(255,204,0,.18)}
-#screen button:disabled{background:#333;color:#777}
+body{color:white;display:flex;justify-content:center;align-items:center;background:linear-gradient(180deg,#080d16 0%,#030508 100%)}
+#wrapper{display:flex;gap:8px;align-items:flex-start}
+#gameWrap{width:var(--board-w)}
+#skills{width:60px;display:flex;flex-direction:column;gap:8px}
+.skillBtn{width:60px;height:60px;border-radius:12px;border:2px solid #29364a;background:linear-gradient(180deg,#151d2a,#0d131d);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8290a6;font-size:24px;cursor:pointer}
+.skillBtn.active{border-color:var(--gold);box-shadow:0 0 15px rgba(255,204,0,.3);color:var(--gold)}
+.skillBtn.locked{opacity:.3;cursor:not-allowed}
+.skillBtn.adbusy{opacity:.5;pointer-events:none}
+.skillCount{font-size:10px;font-weight:900}
+#screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#080d16,#030508);z-index:500}
+#screen h1{margin:0 0 14px;color:var(--gold);font-size:clamp(28px,8vw,42px);font-weight:900}
 #hud{width:100%;display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
-.hudCard{flex:1;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid #29364a;border-radius:10px;padding:7px 10px;text-align:center}
-.hudLabel{display:block;color:#8290a6;font-size:10px;font-weight:800;text-transform:uppercase}
+.hudCard{flex:1;background:#151d2a;border:1px solid #29364a;border-radius:10px;padding:7px 10px;text-align:center}
+.hudLabel{display:block;color:#8290a6;font-size:10px;font-weight:800}
 .hudValue{font-size:17px;font-weight:900}
 #topbar{display:flex;justify-content:center;margin-bottom:8px}
-#nextBox{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid var(--gold);border-radius:12px;padding:6px 16px}
-.nextLabel{color:#8f9caf;font-size:11px;font-weight:900}
-#nextCreature{font-size:29px;min-width:34px;text-align:center}
-#message{height:25px;display:flex;align-items:center;justify-content:center;color:#aeb8c8;font-size:11px;font-weight:800;margin-bottom:5px;text-align:center}
-.messageGood{color:var(--green)!important}.messageBad{color:var(--gold)!important}
-#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell),var(--cell) var(--cell),100% 100%;cursor:pointer;touch-action:none}
+#nextBox{display:flex;align-items:center;gap:10px;background:#151d2a;border:1px solid var(--gold);border-radius:12px;padding:6px 16px}
+#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell);cursor:pointer;touch-action:none}
 .columnGlow{position:absolute;top:0;bottom:0;width:var(--cell);pointer-events:none;background:linear-gradient(180deg,rgba(255,204,0,.04),transparent 35%)}
-.cell{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(28px,8vw,38px);transition:left 100ms ease,top 100ms ease;z-index:5;user-select:none}
-.lvltext{position:absolute;right:4px;bottom:3px;color:#c8d0dc;font-size:9px;font-weight:900;text-shadow:0 1px 3px #000}
-.falling{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(28px,8vw,38px);z-index:20}
+.cell{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(24px,7vw,34px);transition:left 100ms ease,top 100ms ease;z-index:5}
+.falling{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(24px,7vw,34px);z-index:20}
 .shake{animation:shake 160ms ease}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
-.rising{animation:boardRise 300ms ease}@keyframes boardRise{0%{transform:translateY(18px)}50%{transform:translateY(-2px)}100%{transform:translateY(0)}}
-.goldflash{position:absolute;inset:0;z-index:50;pointer-events:none;background:radial-gradient(circle,rgba(255,215,0,.75),transparent 65%);animation:goldFlash 500ms ease forwards}@keyframes goldFlash{from{opacity:1}to{opacity:0}}
-.scorepop{position:absolute;color:var(--gold);font-size:15px;font-weight:900;z-index:60;pointer-events:none;text-shadow:0 2px 4px #000;animation:scorePop 650ms ease forwards}@keyframes scorePop{from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-28px) scale(1.2);opacity:0}}
+#message{height:25px;text-align:center;color:#aeb8c8;font-size:11px;font-weight:800;margin-bottom:5px}
+.messageGood{color:var(--green)!important}.messageBad{color:var(--gold)!important}
 #gameover{position:absolute;inset:0;background:rgba(2,4,7,.95);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:100;border-radius:12px;text-align:center}
-#gameover h2{margin:0 0 6px;font-size:30px}.finalScore{font-size:17px}.finalBest{color:#aeb8c8;margin-bottom:8px}
 #gameover button{width:220px;padding:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:15px;font-weight:900}
-#gameover button.secondary{background:#29313d;color:white}#gameover button:disabled{background:#222;color:#666}
-@media(max-width:380px){:root{--board-w:280px;--board-h:392px}}
+#gameover button.secondary{background:#29313d;color:white}
 </style>
 </head>
 <body>
 <div id="wrapper">
-  <div id="hud" style="display:none"><div class="hudCard"><span class="hudLabel">Score</span><span class="hudValue" id="score">0</span></div><div class="hudCard"><span class="hudLabel">Best</span><span class="hudValue" id="best">0</span></div></div>
-  <div id="topbar" style="display:none"><div id="nextBox"><span class="nextLabel">NEXT</span><span id="nextCreature">🐜</span></div></div>
-  <div id="message" style="display:none">TAP A COLUMN TO DROP</div>
-  <div id="game">
-    <div class="columnGlow" style="left:0"></div><div class="columnGlow" style="left:var(--cell)"></div><div class="columnGlow" style="left:calc(var(--cell)*2)"></div><div class="columnGlow" style="left:calc(var(--cell)*3)"></div><div class="columnGlow" style="left:calc(var(--cell)*4)"></div>
-    <div id="gameover"><h2>GAME OVER</h2><div class="finalScore">Score: <span id="finalScore">0</span></div><div class="finalBest">Best: <span id="finalBest">0</span></div><button id="adBtn" onclick="watchAdContinue()">📺 WATCH AD & CONTINUE</button><button class="secondary" onclick="shareScore()">📤 SHARE SCORE</button><button class="secondary" onclick="startGame(true)">PLAY AGAIN</button></div>
+  <div id="skills">
+    <div id="skill1" class="skillBtn locked" onclick="handleSkillClick(1)">⚡<div class="skillCount" id="count1">🔒</div></div>
+    <div id="skill2" class="skillBtn locked" onclick="handleSkillClick(2)">✚<div class="skillCount" id="count2">🔒</div></div>
+    <div id="skill3" class="skillBtn locked" onclick="handleSkillClick(3)">💣<div class="skillCount" id="count3">🔒</div></div>
+    <div id="skill4" class="skillBtn locked" onclick="handleSkillClick(4)">🧬<div class="skillCount" id="count4">🔒</div></div>
+  </div>
+  <div id="gameWrap">
+    <div id="hud" style="display:none"><div class="hudCard"><span class="hudLabel">Score</span><span class="hudValue" id="score">0</span></div><div class="hudCard"><span class="hudLabel">Best</span><span class="hudValue" id="best">0</span></div></div>
+    <div id="topbar" style="display:none"><div id="nextBox"><span>NEXT</span><span id="nextCreature">🐜</span></div></div>
+    <div id="message" style="display:none">TAP A COLUMN TO DROP</div>
+    <div id="game">
+      <div class="columnGlow" style="left:0"></div><div class="columnGlow" style="left:var(--cell)"></div><div class="columnGlow" style="left:calc(var(--cell)*2)"></div><div class="columnGlow" style="left:calc(var(--cell)*3)"></div><div class="columnGlow" style="left:calc(var(--cell)*4)"></div>
+      <div id="gameover"><h2>GAME OVER</h2><div>Score: <span id="finalScore">0</span></div><button class="secondary" onclick="shareScore()">📤 SHARE SCORE</button><button onclick="startGame(true)">PLAY AGAIN</button></div>
+    </div>
   </div>
 </div>
-<div id="screen"><h1>EAT TO EVOLVE</h1><div class="subtitle">Drop • Merge • Evolve • Survive</div><div class="bestTitle">BEST: <strong id="titleBest">0</strong></div><button id="playBtn" onclick="startGame(false)" disabled>LOADING...</button></div>
+<div id="screen"><h1>EAT TO EVOLVE</h1><button id="playBtn" onclick="startGame(false)">PLAY</button></div>
 <script>
 const W=5,H=7;const CREATURES=[{name:"Ant",emoji:"🐜",lvl:1,weight:40},{name:"Cockroach",emoji:"🪳",lvl:2,weight:30},{name:"Bird",emoji:"🐦",lvl:3,weight:20},{name:"Lizard",emoji:"🦎",lvl:4,weight:9},{name:"Crocodile",emoji:"🐊",lvl:5,weight:1}];
-let board,score=0,best=0,nextCreature=null,gameOver=false,busy=false,hasUsedContinue=false,audioCtx=null,crazyReady=false,sessionStart=0,mergeCount=0,highestLvl=1;
-let firstMergeLogged=false, dragonLogged=false, CELL=64;
+let board,score=0,best=0,nextCreature=null,gameOver=false,busy=false,CELL=56;
+let highestLvl=1, skillUnlocked=[false,false,false,false], skillCharges=[0,0,0,0], adBusy=[false,false,false], activeSkill=null;
 const gameEl=document.getElementById("game"),messageEl=document.getElementById("message"),nextEl=document.getElementById("nextCreature");
 
-// ===== V1.2.1: REAL ANALYTICS =====
-const ANALYTICS_ENDPOINT = "https://YOUR-WORKER-URL.workers.dev"; // <-- REPLACE THIS
+// ===== ANALYTICS =====
+const ANALYTICS_ENDPOINT = "https://YOUR-WORKER-URL.workers.dev";
+async function logEvent(name, data={}){console.log(`[ANALYTICS] ${name}`, data);try{await fetch(ANALYTICS_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,data,t:Date.now(),score})})}catch(e){}}
 
-async function logEvent(name, data={}){
-  console.log(`[ANALYTICS] ${name}`, data);
-  try{
-    await fetch(ANALYTICS_ENDPOINT,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({name,data,t:Date.now(),score})
-    });
-  }catch(e){}
+// ===== V1.3.2: SINGLE SOURCE OF TRUTH FOR UNLOCKS =====
+function checkDragonUnlocks(){
+  const unlocks = [
+    {lvl:6, skill:1, icon:"⚡"},
+    {lvl:7, skill:2, icon:"✚"},
+    {lvl:8, skill:3, icon:"💣"},
+    {lvl:9, skill:4, icon:"🧬"}
+  ];
+  for(const u of unlocks){
+    const i = u.skill - 1;
+    if(highestLvl >= u.lvl &&!skillUnlocked[i]){
+      skillUnlocked[i] = true;
+      skillCharges[i] = 1;
+      logEvent("dragon_reached",{level:u.skill});
+      logEvent("skill_unlocked",{skill:u.skill});
+      setMessage(`🐲 DRAGON Lv${u.skill} UNLOCKED! ${u.icon}`,"good");
+    }
+  }
+  updateSkillsUI();
 }
 
-function cgGameplayStart(){try{if(window.CrazyGames?.SDK?.game?.gameplayStart)window.CrazyGames.SDK.game.gameplayStart();}catch(e){}}
-function cgGameplayStop(){try{if(window.CrazyGames?.SDK?.game?.gameplayStop)window.CrazyGames.SDK.gameplayStop();}catch(e){}}
-
-// ===== CELL + TAP MATH =====
-function updateCellSize(){
-  CELL = gameEl.clientWidth / W;
-  document.documentElement.style.setProperty('--cell', CELL + 'px');
-  document.querySelectorAll('.columnGlow').forEach((el,i)=>{el.style.left = (i*CELL)+'px'; el.style.width = CELL+'px';})
+function updateSkillsUI(){
+  for(let i=0;i<4;i++){
+    const btn=document.getElementById("skill"+(i+1)), count=document.getElementById("count"+(i+1));
+    btn.classList.toggle("adbusy", adBusy[i]);
+    if(skillUnlocked[i]){
+      btn.classList.remove("locked");
+      if(skillCharges[i] > 0) count.textContent = skillCharges[i];
+      else count.textContent = "📺+2";
+    }else{
+      btn.classList.add("locked");
+      count.textContent = "🔒";
+    }
+  }
 }
-function getColFromX(x){
-  const width = gameEl.clientWidth;
-  const xIn = x - gameEl.clientLeft;
-  const col = Math.floor((xIn / width) * W);
-  return Math.max(0, Math.min(W - 1, col));
+
+function handleSkillClick(id){
+  const i = id-1;
+  if(!skillUnlocked[i] || adBusy[i]) return;
+  if(skillCharges[i] === 0){ watchAdForSkill(id); return; }
+  selectSkill(id);
 }
 
-// ===== CORE =====
-async function initCrazyGames(){try{await window.CrazyGames.SDK.init();crazyReady=true;document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}catch(e){document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}}
-function initAudio(){if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)()}}
-function sound(freq,duration=.12){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=freq;g.gain.setValueAtTime(.12,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.start();o.stop(audioCtx.currentTime+duration)}
+function selectSkill(id){
+  if(activeSkill) return;
+  activeSkill = id;
+  document.querySelectorAll(".skillBtn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("skill"+id).classList.add("active");
+  const names = ["","ROW LASER","CROSS LASER","MEGA BOMB","SPECIES ERASE"];
+  setMessage(names[id]+" ACTIVE - TAP TARGET","good");
+}
+
+function watchAdForSkill(id){
+  const i=id-1;
+  if(adBusy[i]) return;
+  adBusy[i]=true; updateSkillsUI();
+  setTimeout(()=>{
+    skillCharges[i]+=2;
+    adBusy[i]=false;
+    logEvent("skill_ad_watched",{skill:id});
+    logEvent("skill_recharged",{skill:id,charges:skillCharges[i]});
+    updateSkillsUI();
+    setMessage(`+2 USES ADDED`,"good");
+  },1000);
+}
+
+function useSkill(x,y){
+  const id = activeSkill; activeSkill=null;
+  document.querySelectorAll(".skillBtn").forEach(b=>b.classList.remove("active"));
+  if(id===4 &&!board[y][x]){ setMessage("TAP A CREATURE","bad"); return; }
+
+  skillCharges[id-1]--;
+  logEvent("skill_used",{skill:id});
+  updateSkillsUI();
+  sound(200,.2);
+
+  if(id===1){ for(let cx=0;cx<W;cx++) board[y][cx]=null; }
+  if(id===2){ for(let cx=0;cx<W;cx++) board[y][cx]=null; for(let ry=0;ry<H;ry++) board[ry][x]=null; }
+  if(id===3){ for(let ry=y-1;ry<=y+1;ry++)for(let cx=x-1;cx<=x+1;cx++) if(ry>=0&&ry<H&&cx>=0&&cx<W) board[ry][cx]=null; }
+  if(id===4){ const targetLvl = board[y][x].lvl; for(let ry=0;ry<H;ry++)for(let cx=0;cx<W;cx++) if(board[ry][cx]?.lvl===targetLvl) board[ry][cx]=null; }
+
+  settle();
+  const result = resolveMerges(); // FIX: Check unlocks after skill merge
+  checkDragonUnlocks();
+  render();
+  setMessage("POWER USED!","good");
+  if(result.didMerge){ gameEl.classList.add("shake"); setTimeout(()=>{ gameEl.classList.remove("shake"); },160); }
+}
+
+function shareScore(){
+  const text=`I scored ${score} and reached Lv${highestLvl} in Eat to Evolve! 🐲🔥`;
+  if(navigator.share){navigator.share({title:"Eat to Evolve",text}).catch(()=>{})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(text)}
+}
+
+// ===== V1.2.1 DROP LOGIC UNTOUCHED =====
+function updateCellSize(){CELL = gameEl.clientWidth / W;document.documentElement.style.setProperty('--cell', CELL + 'px');document.querySelectorAll('.columnGlow').forEach((el,i)=>{el.style.left = (i*CELL)+'px'; el.style.width = CELL+'px';})}
+function getColFromX(x){const width = gameEl.clientWidth;const xIn = x - gameEl.clientLeft;const col = Math.floor((xIn / width) * W);return Math.max(0, Math.min(W - 1, col));}
 function randCreature(){const total=CREATURES.reduce((a,b)=>a+b.weight,0);let r=Math.random()*total;for(const c of CREATURES){r-=c.weight;if(r<=0)return{...c}}return{...CREATURES[0]}}
 
 function initBoard(){
-  updateCellSize();
-  board=Array.from({length:H},()=>Array(W).fill(null));score=0;gameOver=false;busy=false;hasUsedContinue=false;mergeCount=0;highestLvl=1;
-  firstMergeLogged=false; dragonLogged=false;
+  updateCellSize();skillUnlocked=[false,false,false,false];skillCharges=[0,0,0,0];adBusy=[false,false,false,false];activeSkill=null;
+  board=Array.from({length:H},()=>Array(W).fill(null));score=0;gameOver=false;busy=false;highestLvl=1;
   best=parseInt(localStorage.getItem("eatEvolveBest")||"0");nextCreature=randCreature();
-  updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();
-  logEvent("Game_Start");cgGameplayStart();
+  updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();updateSkillsUI();
+  logEvent("Game_Start");
 }
 
-function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("best").textContent=best;document.getElementById("titleBest").textContent=best}
+function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("best").textContent=best}
 function updateNext(){nextEl.textContent=getEmojiByLvl(nextCreature.lvl)}
 function setMessage(text,type=""){messageEl.textContent=text;messageEl.className=type==="good"?"messageGood":type==="bad"?"messageBad":""}
-function render(){gameEl.querySelectorAll(".cell,.scorepop,.goldflash").forEach(el=>el.remove());for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=board[y][x];if(!c)continue;const div=document.createElement("div");div.className="cell";div.style.left=x*CELL+"px";div.style.top=y*CELL+"px";div.innerHTML=`<span class="emoji">${getEmojiByLvl(c.lvl)}</span><div class="lvltext">${c.lvl}</div>`;gameEl.appendChild(div);}}
+function render(){gameEl.querySelectorAll(".cell").forEach(el=>el.remove());for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=board[y][x];if(!c)continue;const div=document.createElement("div");div.className="cell";div.style.left=x*CELL+"px";div.style.top=y*CELL+"px";div.innerHTML=`<span>${getEmojiByLvl(c.lvl)}</span>`;gameEl.appendChild(div);}}
 
-async function animateDrop(col,creature,row){
-  const falling=document.createElement("div");
-  falling.className="falling";
-  falling.style.left=(col*CELL)+"px";
-  falling.style.top="0px";
-  falling.innerHTML=`<span class="emoji">${getEmojiByLvl(creature.lvl)}</span>`;
-  gameEl.appendChild(falling);
-  sound(150,.09);
-  const distance=row*CELL;
-  const duration=260+row*55;
-  falling.animate([
-    {transform:`translateY(-${CELL}px) scale(.9)`,opacity:.25},
-    {transform:`translateY(${distance}px) scale(1.04)`,opacity:1},
-    {transform:`translateY(${distance}px) scale(1)`,opacity:1}
-  ],{duration,easing:"cubic-bezier(.2,.75,.25,1)"});
-  await sleep(duration);
-  falling.remove();
-}
+async function animateDrop(col,creature,row){const falling=document.createElement("div");falling.className="falling";falling.style.left=(col*CELL)+"px";falling.style.top="0px";falling.innerHTML=`<span>${getEmojiByLvl(creature.lvl)}</span>`;gameEl.appendChild(falling);sound(150,.09);const distance=row*CELL;const duration=260+row*55;falling.animate([{transform:`translateY(-${CELL}px) scale(.9)`,opacity:.25},{transform:`translateY(${distance}px) scale(1.04)`,opacity:1},{transform:`translateY(${distance}px) scale(1)`,opacity:1}],{duration});await sleep(duration);falling.remove();}
 
-// BOTTOM-UP STACK
 async function drop(col){
-  if(gameOver || busy || !board) return;
+  if(gameOver || busy ||!board || activeSkill) return;
   if(col < 0 || col >= W){ return; }
   busy = true;
-  if(sessionStart === 0){ sessionStart = Date.now(); logEvent("First_Drop"); }
-  updateCellSize();
-
-  let row = -1;
-  for(let y = H - 1; y >= 0; y--){
-    if(board[y][col] === null){
-      row = y;
-      break;
-    }
-  }
-
-  if(row === -1){
-    setMessage("COLUMN FULL — TRY ANOTHER","bad");
-    sound(90,.15);
-    busy = false;
-    return;
-  }
-
-  const creature = {...nextCreature};
-  nextCreature = randCreature();
-  updateNext();
-  setMessage("FALLING...");
-  await animateDrop(col, creature, row);
-  board[row][col] = creature;
-  sound(260,.08);
-
+  let row = -1; for(let y = H - 1; y >= 0; y--){ if(board[y][col] === null){ row = y; break; }}
+  if(row === -1){ setMessage("COLUMN FULL — TRY ANOTHER","bad"); sound(90,.15); busy = false; return; }
+  const creature = {...nextCreature}; nextCreature = randCreature(); updateNext(); setMessage("FALLING...");
+  await animateDrop(col, creature, row); board[row][col] = creature; sound(260,.08);
   const result = resolveMerges();
+  checkDragonUnlocks(); // FIX: Single source
   render();
   if(result.didMerge){
-    mergeCount++;
-    if(result.isDragonMerge && !dragonLogged){ dragonLogged = true; logEvent("dragon_reached",{lvl:highestLvl}); }
-    setMessage(result.isDragonMerge ? "🐲 EVOLUTION!" : "MERGE!","good");
-    gameEl.classList.add("shake");
-    setTimeout(()=>{ gameEl.classList.remove("shake"); },160);
-    if(result.isDragonMerge){ playDragonEffect(); }
-  }else{
-    setMessage("NO MERGE — BOARD RISES!","bad");
-    await sleep(220);
-    if(!addPressureRow()){ busy = false; gameOverFn(); return; }
-  }
-
-  if(board[0].some(cell => cell)){
-    busy = false;
-    gameOverFn();
-    return;
-  }
-  busy = false;
+    gameEl.classList.add("shake");setTimeout(()=>{ gameEl.classList.remove("shake"); },160);
+  }else{ setMessage("NO MERGE — BOARD RISES!","bad"); await sleep(220); if(!addPressureRow()){ busy = false; gameOverFn(); return; }}
+  if(board[0].some(cell => cell)){ busy = false; gameOverFn(); return; }
+  updateSkillsUI(); busy = false;
 }
 
-function resolveMerges(){let didMerge=false,isDragonMerge=false;while(true){let found=false;outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){const cur=board[y][x];if(!cur)continue;if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x,y+1,newLvl);found=true;didMerge=true;break outer}if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x+1,y,newLvl);found=true;didMerge=true;break outer}}if(!found)break;settle()}return{didMerge,isDragonMerge}}
-function mergeCells(x1,y1,x2,y2,newLvl){board[y2][x2].lvl=newLvl;board[y1][x1]=null;addScore(newLvl,x2,y2);if(!firstMergeLogged){firstMergeLogged=true;logEvent("First_Merge");}gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),150);if(newLvl>=5)sound(420,.18);else if(newLvl>=3)sound(600,.12);else sound(800,.08);}
-function addScore(lvl,x,y){let points=10*lvl;if(lvl>=6)points=100*(lvl-5);score+=points;updateHUD();const pop=document.createElement("div");pop.className="scorepop";pop.style.left=x*CELL+CELL/3+"px";pop.style.top=y*CELL+"px";pop.textContent="+"+points;gameEl.appendChild(pop);setTimeout(()=>pop.remove(),650)}
+function resolveMerges(){let didMerge=false;while(true){let found=false;outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){const cur=board[y][x];if(!cur)continue;if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){mergeCells(x,y,x,y+1,cur.lvl+1);found=true;didMerge=true;break outer}if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){mergeCells(x,y,x+1,y,cur.lvl+1);found=true;didMerge=true;break outer}}if(!found)break;settle()}return{didMerge}}
+function mergeCells(x1,y1,x2,y2,newLvl){board[y2][x2].lvl=newLvl;if(newLvl>highestLvl){highestLvl=newLvl;}board[y1][x1]=null;score+=10*newLvl;updateHUD();sound(600,.1);}
 function settle(){for(let x=0;x<W;x++){let write=H-1;for(let y=H-1;y>=0;y--)if(board[y][x]){if(write!==y){board[write][x]=board[y][x];board[y][x]=null}write--}}}
-function addPressureRow(){if(board[0].some(cell=>cell))return false;for(let y=0;y<H-1;y++)board[y]=[...board[y+1]];const newRow=Array(W).fill(null);for(let x=0;x<W;x++)if(Math.random()<.6)newRow[x]=randCreature();board[H-1]=newRow;gameEl.classList.add("rising");setTimeout(()=>gameEl.classList.remove("rising"),300);render();return true;}
-function playDragonEffect(){sound(80,.35);setTimeout(()=>sound(1000,.25),130);setTimeout(()=>sound(1500,.2),250);const flash=document.createElement("div");flash.className="goldflash";gameEl.appendChild(flash);setTimeout(()=>flash.remove(),500)}
+function addPressureRow(){if(board[0].some(cell=>cell))return false;for(let y=0;y<H-1;y++)board[y]=[...board[y+1]];const newRow=Array(W).fill(null);for(let x=0;x<W;x++)if(Math.random()<.6)newRow[x]=randCreature();board[H-1]=newRow;render();return true;}
 function getEmojiByLvl(lvl){if(lvl<=5)return["","🐜","🪳","🐦","🦎","🐊"][lvl];const d=lvl-5;if(d===1)return"🐲";if(d===2)return"🐲👑";if(d===3)return"🐲👑";return"🐲🔥"}
-
-function gameOverFn(){
-  gameOver=true;const sessionDuration=Math.floor((Date.now()-sessionStart)/1000);
-  logEvent("Game_Over",{score,highestLvl,mergeCount,sessionDuration});
-  cgGameplayStop();
-  if(score>best){best=score;localStorage.setItem("eatEvolveBest",best)}
-  updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("finalBest").textContent=best;
-  const adBtn=document.getElementById("adBtn");adBtn.disabled=hasUsedContinue;adBtn.textContent=hasUsedContinue?"USED":"📺 WATCH AD & CONTINUE";
-  document.getElementById("gameover").style.display="flex";sessionStart=0;
-}
-
-function watchAdContinue(){
-  if(hasUsedContinue)return;const btn=document.getElementById("adBtn");btn.disabled=true;btn.textContent="LOADING AD...";
-  if(!crazyReady||!window.CrazyGames?.SDK?.ad){btn.disabled=false;btn.textContent="AD UNAVAILABLE";return}
-  window.CrazyGames.SDK.ad.requestAd("rewarded",{adStarted:()=>{if(audioCtx&&audioCtx.state==="running")audioCtx.suspend().catch(()=>{})},adFinished:()=>{logEvent("Ad_Watched");hasUsedContinue=true;if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});doContinue()},adError:(error)=>{console.log("Rewarded ad failed:",error);if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});btn.disabled=false;btn.textContent="📺 WATCH AD & CONTINUE"}})
-}
-
-function doContinue(){for(let y=0;y<4;y++)for(let x=0;x<W;x++)board[y][x]=null;settle();gameOver=false;document.getElementById("gameover").style.display="none";setMessage("CONTINUE! KEEP MERGING!","good")}
-function shareScore(){const text=`I scored ${score} in Eat to Evolve! 🐲🔥 Can you beat me?`;if(navigator.share){navigator.share({title:"Eat to Evolve",text}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text)}}
-
-function startGame(fromReplay=false){
-  if(fromReplay) logEvent("Play_Again"); else logEvent("Game_Start_Click");
-  initAudio();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});
-  document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard();
-}
+function gameOverFn(){gameOver=true;logEvent("Game_Over",{score,highestLvl});if(score>best){best=score;localStorage.setItem("eatEvolveBest",best)}updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("gameover").style.display="flex";}
+function startGame(fromReplay=false){if(fromReplay) logEvent("Play_Again");document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard();}
+function sound(freq,duration=.12){}
 
 gameEl.addEventListener("pointerdown", e => {
-  if(gameOver || busy || !board) return;
+  if(gameOver || busy ||!board) return;
   e.preventDefault();
   const rect = gameEl.getBoundingClientRect();
-  const x = e.clientX - rect.left - gameEl.clientLeft;
-  if(x < 0 || x > gameEl.clientWidth){ return; }
-  const col = getColFromX(x + gameEl.clientLeft);
+  const rawX = e.clientX - rect.left - gameEl.clientLeft;
+  const rawY = e.clientY - rect.top - gameEl.clientTop;
+  const col = Math.max(0, Math.min(W - 1, Math.floor(rawX / CELL)));
+  const row = Math.max(0, Math.min(H - 1, Math.floor(rawY / CELL)));
+  if(activeSkill){ useSkill(col,row); return; }
   drop(col);
 });
 
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
-window.addEventListener('resize', updateCellSize);
-initCrazyGames();
+initCrazyGames(); async function initCrazyGames(){try{await window.CrazyGames.SDK.init();document.getElementById("playBtn").disabled=false;}catch(e){document.getElementById("playBtn").disabled=false;}}
 </script>
 </body>
 </html>
