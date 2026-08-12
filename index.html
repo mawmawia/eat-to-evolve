@@ -3,42 +3,39 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Eat to Evolve v1.1.9</title>
+<title>Eat to Evolve v1.2.1</title>
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
 :root{ --cell:64px; --board-w:320px; --board-h:448px; --gold:#ffcc00; --green:#45ff72; --accent:#38bdf8; }
 *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden}
 body{color:white;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at 50% 15%,#182b48 0%,transparent 38%),radial-gradient(circle at 10% 90%,#10251b 0%,transparent 35%),linear-gradient(180deg,#080d16 0%,#030508 100%)}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:32px 32px}
 #wrapper{width:var(--board-w);position:relative;z-index:2}
 #screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(255,204,0,.09),transparent 32%),linear-gradient(180deg,#080d16,#030508);z-index:500}
 #screen h1{margin:0 0 14px;color:var(--gold);font-size:clamp(28px,8vw,42px);font-weight:900;letter-spacing:1px;text-shadow:0 0 20px rgba(255,204,0,.25)}
 .subtitle{color:#aeb8c8;font-size:14px;margin-bottom:22px}
 .bestTitle{background:#111927;border:1px solid #26344b;border-radius:12px;padding:10px 20px;margin-bottom:22px}
-#screen button{width:220px;padding:16px;border:0;border-radius:12px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:18px;font-weight:900;box-shadow:0 8px 25px rgba(255,204,0,.18);transition:transform.1s}
-#screen button:active{transform:scale(.97)}#screen button:disabled{background:#333;color:#777}
+#screen button{width:220px;padding:16px;border:0;border-radius:12px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:18px;font-weight:900;box-shadow:0 8px 25px rgba(255,204,0,.18)}
+#screen button:disabled{background:#333;color:#777}
 #hud{width:100%;display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
-.hudCard{flex:1;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid #29364a;border-radius:10px;padding:7px 10px;text-align:center;box-shadow:0 5px 18px rgba(0,0,0,.3)}
+.hudCard{flex:1;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid #29364a;border-radius:10px;padding:7px 10px;text-align:center}
 .hudLabel{display:block;color:#8290a6;font-size:10px;font-weight:800;text-transform:uppercase}
 .hudValue{font-size:17px;font-weight:900}
 #topbar{display:flex;justify-content:center;margin-bottom:8px}
-#nextBox{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid var(--gold);border-radius:12px;padding:6px 16px;box-shadow:0 0 20px rgba(255,204,0,.04)}
+#nextBox{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#151d2a,#0d131d);border:1px solid var(--gold);border-radius:12px;padding:6px 16px}
 .nextLabel{color:#8f9caf;font-size:11px;font-weight:900}
 #nextCreature{font-size:29px;min-width:34px;text-align:center}
-#message{height:25px;display:flex;align-items:center;justify-content:center;color:#aeb8c8;font-size:11px;font-weight:800;margin-bottom:5px;text-align:center;transition:color.2s}
+#message{height:25px;display:flex;align-items:center;justify-content:center;color:#aeb8c8;font-size:11px;font-weight:800;margin-bottom:5px;text-align:center}
 .messageGood{color:var(--green)!important}.messageBad{color:var(--gold)!important}
-#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell),var(--cell) var(--cell),100% 100%;box-shadow:0 15px 40px rgba(0,0,0,.55),inset 0 0 35px rgba(0,0,0,.45);cursor:pointer}
+#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell),var(--cell) var(--cell),100% 100%;cursor:pointer;touch-action:none}
 .columnGlow{position:absolute;top:0;bottom:0;width:var(--cell);pointer-events:none;background:linear-gradient(180deg,rgba(255,204,0,.04),transparent 35%)}
 .cell{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(28px,8vw,38px);transition:left 100ms ease,top 100ms ease;z-index:5;user-select:none}
 .lvltext{position:absolute;right:4px;bottom:3px;color:#c8d0dc;font-size:9px;font-weight:900;text-shadow:0 1px 3px #000}
 .falling{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(28px,8vw,38px);z-index:20}
-.merge{animation:mergePop 220ms ease;z-index:30}@keyframes mergePop{0%{transform:scale(1)}55%{transform:scale(1.45);filter:drop-shadow(0 0 12px var(--gold))}100%{transform:scale(1)}}
 .shake{animation:shake 160ms ease}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 .rising{animation:boardRise 300ms ease}@keyframes boardRise{0%{transform:translateY(18px)}50%{transform:translateY(-2px)}100%{transform:translateY(0)}}
 .goldflash{position:absolute;inset:0;z-index:50;pointer-events:none;background:radial-gradient(circle,rgba(255,215,0,.75),transparent 65%);animation:goldFlash 500ms ease forwards}@keyframes goldFlash{from{opacity:1}to{opacity:0}}
 .scorepop{position:absolute;color:var(--gold);font-size:15px;font-weight:900;z-index:60;pointer-events:none;text-shadow:0 2px 4px #000;animation:scorePop 650ms ease forwards}@keyframes scorePop{from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-28px) scale(1.2);opacity:0}}
-#tapzones{display:none}
 #gameover{position:absolute;inset:0;background:rgba(2,4,7,.95);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:100;border-radius:12px;text-align:center}
 #gameover h2{margin:0 0 6px;font-size:30px}.finalScore{font-size:17px}.finalBest{color:#aeb8c8;margin-bottom:8px}
 #gameover button{width:220px;padding:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:15px;font-weight:900}
@@ -55,7 +52,6 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;ba
     <div class="columnGlow" style="left:0"></div><div class="columnGlow" style="left:var(--cell)"></div><div class="columnGlow" style="left:calc(var(--cell)*2)"></div><div class="columnGlow" style="left:calc(var(--cell)*3)"></div><div class="columnGlow" style="left:calc(var(--cell)*4)"></div>
     <div id="gameover"><h2>GAME OVER</h2><div class="finalScore">Score: <span id="finalScore">0</span></div><div class="finalBest">Best: <span id="finalBest">0</span></div><button id="adBtn" onclick="watchAdContinue()">📺 WATCH AD & CONTINUE</button><button class="secondary" onclick="shareScore()">📤 SHARE SCORE</button><button class="secondary" onclick="startGame(true)">PLAY AGAIN</button></div>
   </div>
-  <div id="tapzones"></div>
 </div>
 <div id="screen"><h1>EAT TO EVOLVE</h1><div class="subtitle">Drop • Merge • Evolve • Survive</div><div class="bestTitle">BEST: <strong id="titleBest">0</strong></div><button id="playBtn" onclick="startGame(false)" disabled>LOADING...</button></div>
 <script>
@@ -64,21 +60,38 @@ let board,score=0,best=0,nextCreature=null,gameOver=false,busy=false,hasUsedCont
 let firstMergeLogged=false, dragonLogged=false, CELL=64;
 const gameEl=document.getElementById("game"),messageEl=document.getElementById("message"),nextEl=document.getElementById("nextCreature");
 
-// ===== ANALYTICS =====
-function logEvent(name, data={}){console.log(`[ANALYTICS] ${name}`, data);}
+// ===== V1.2.1: REAL ANALYTICS =====
+const ANALYTICS_ENDPOINT = "https://YOUR-WORKER-URL.workers.dev"; // <-- REPLACE THIS
+
+async function logEvent(name, data={}){
+  console.log(`[ANALYTICS] ${name}`, data);
+  try{
+    await fetch(ANALYTICS_ENDPOINT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name,data,t:Date.now(),score})
+    });
+  }catch(e){}
+}
+
 function cgGameplayStart(){try{if(window.CrazyGames?.SDK?.game?.gameplayStart)window.CrazyGames.SDK.game.gameplayStart();}catch(e){}}
 function cgGameplayStop(){try{if(window.CrazyGames?.SDK?.game?.gameplayStop)window.CrazyGames.SDK.gameplayStop();}catch(e){}}
 
-// ===== CELL SIZE =====
+// ===== CELL + TAP MATH =====
 function updateCellSize(){
   CELL = gameEl.clientWidth / W;
   document.documentElement.style.setProperty('--cell', CELL + 'px');
   document.querySelectorAll('.columnGlow').forEach((el,i)=>{el.style.left = (i*CELL)+'px'; el.style.width = CELL+'px';})
 }
-function getColFromX(x){ return Math.floor(x / CELL); }
+function getColFromX(x){
+  const width = gameEl.clientWidth;
+  const xIn = x - gameEl.clientLeft;
+  const col = Math.floor((xIn / width) * W);
+  return Math.max(0, Math.min(W - 1, col));
+}
 
 // ===== CORE =====
-async function initCrazyGames(){try{await window.CrazyGames.SDK.init();crazyReady=true;document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}catch(e){console.log("CrazyGames unavailable");document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}}
+async function initCrazyGames(){try{await window.CrazyGames.SDK.init();crazyReady=true;document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}catch(e){document.getElementById("playBtn").disabled=false;document.getElementById("playBtn").textContent="PLAY";}}
 function initAudio(){if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)()}}
 function sound(freq,duration=.12){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=freq;g.gain.setValueAtTime(.12,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.start();o.stop(audioCtx.currentTime+duration)}
 function randCreature(){const total=CREATURES.reduce((a,b)=>a+b.weight,0);let r=Math.random()*total;for(const c of CREATURES){r-=c.weight;if(r<=0)return{...c}}return{...CREATURES[0]}}
@@ -97,75 +110,80 @@ function updateNext(){nextEl.textContent=getEmojiByLvl(nextCreature.lvl)}
 function setMessage(text,type=""){messageEl.textContent=text;messageEl.className=type==="good"?"messageGood":type==="bad"?"messageBad":""}
 function render(){gameEl.querySelectorAll(".cell,.scorepop,.goldflash").forEach(el=>el.remove());for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=board[y][x];if(!c)continue;const div=document.createElement("div");div.className="cell";div.style.left=x*CELL+"px";div.style.top=y*CELL+"px";div.innerHTML=`<span class="emoji">${getEmojiByLvl(c.lvl)}</span><div class="lvltext">${c.lvl}</div>`;gameEl.appendChild(div);}}
 
-// V1.1.9 FIX: DYNAMIC CELL ANIMATION
 async function animateDrop(col,creature,row){
   const falling=document.createElement("div");
   falling.className="falling";
-  falling.style.left=col*CELL+"px";
+  falling.style.left=(col*CELL)+"px";
   falling.style.top="0px";
   falling.innerHTML=`<span class="emoji">${getEmojiByLvl(creature.lvl)}</span>`;
   gameEl.appendChild(falling);
   sound(150,.09);
   const distance=row*CELL;
+  const duration=260+row*55;
   falling.animate([
     {transform:`translateY(-${CELL}px) scale(.9)`,opacity:.25},
     {transform:`translateY(${distance}px) scale(1.04)`,opacity:1},
     {transform:`translateY(${distance}px) scale(1)`,opacity:1}
-  ],{duration:260+row*55,easing:"cubic-bezier(.2,.75,.25,1)"});
-  await new Promise(resolve=>setTimeout(resolve,260+row*55));
+  ],{duration,easing:"cubic-bezier(.2,.75,.25,1)"});
+  await sleep(duration);
   falling.remove();
 }
 
-// V1.1.9 FIX: CORRECT STACK LOGIC
+// BOTTOM-UP STACK
 async function drop(col){
-  if(gameOver||busy)return;busy=true;
-  if(sessionStart===0){sessionStart=Date.now();logEvent("First_Drop");}
+  if(gameOver || busy || !board) return;
+  if(col < 0 || col >= W){ return; }
+  busy = true;
+  if(sessionStart === 0){ sessionStart = Date.now(); logEvent("First_Drop"); }
   updateCellSize();
 
-  let topOccupied=H; // V1.1.9: Start at bottom
-  for(let y=0;y<H;y++){
-    if(board[y][col]){topOccupied=y;break;}
+  let row = -1;
+  for(let y = H - 1; y >= 0; y--){
+    if(board[y][col] === null){
+      row = y;
+      break;
+    }
   }
-  const row=topOccupied===H? H-1 : topOccupied-1; // Empty = bottom, else above top
 
-  if(col<0 || col>=W || row<0 || row>=H){setMessage("COLUMN FULL — TRY ANOTHER","bad");sound(90,.15);busy=false;return;}
+  if(row === -1){
+    setMessage("COLUMN FULL — TRY ANOTHER","bad");
+    sound(90,.15);
+    busy = false;
+    return;
+  }
 
-  const creature={...nextCreature};nextCreature=randCreature();updateNext();setMessage("FALLING...");await animateDrop(col,creature,row);
-  board[row][col]=creature;sound(260,.08);
-  const result=resolveMerges();render();
+  const creature = {...nextCreature};
+  nextCreature = randCreature();
+  updateNext();
+  setMessage("FALLING...");
+  await animateDrop(col, creature, row);
+  board[row][col] = creature;
+  sound(260,.08);
+
+  const result = resolveMerges();
+  render();
   if(result.didMerge){
     mergeCount++;
-    if(result.isDragonMerge &&!dragonLogged){dragonLogged=true;logEvent("dragon_reached",{lvl:highestLvl});}
-    setMessage(result.isDragonMerge? "🐲 EVOLUTION!" : "MERGE!","good");gameEl.classList.add("shake");setTimeout(()=>{gameEl.classList.remove("shake");},160);if(result.isDragonMerge){playDragonEffect();}
+    if(result.isDragonMerge && !dragonLogged){ dragonLogged = true; logEvent("dragon_reached",{lvl:highestLvl}); }
+    setMessage(result.isDragonMerge ? "🐲 EVOLUTION!" : "MERGE!","good");
+    gameEl.classList.add("shake");
+    setTimeout(()=>{ gameEl.classList.remove("shake"); },160);
+    if(result.isDragonMerge){ playDragonEffect(); }
   }else{
-    setMessage("NO MERGE — BOARD RISES!","bad");await sleep(220);if(!addPressureRow()){busy=false;gameOverFn();return;}
+    setMessage("NO MERGE — BOARD RISES!","bad");
+    await sleep(220);
+    if(!addPressureRow()){ busy = false; gameOverFn(); return; }
   }
-  if(board[0].some(cell=>cell)){busy=false;gameOverFn();return;}
-  busy=false;
+
+  if(board[0].some(cell => cell)){
+    busy = false;
+    gameOverFn();
+    return;
+  }
+  busy = false;
 }
 
-function resolveMerges(){
-  let didMerge=false,isDragonMerge=false;
-  while(true){
-    let found=false;
-    outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){
-      const cur=board[y][x];if(!cur)continue;
-      if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){
-        const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;
-        if(newLvl>=6)isDragonMerge=true;
-        mergeCells(x,y,x,y+1,newLvl);found=true;didMerge=true;break outer
-      }
-      if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){
-        const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;
-        if(newLvl>=6)isDragonMerge=true;
-        mergeCells(x,y,x+1,y,newLvl);found=true;didMerge=true;break outer
-      }
-    }
-    if(!found)break;settle()
-  }
-  return{didMerge,isDragonMerge}
-}
-
+function resolveMerges(){let didMerge=false,isDragonMerge=false;while(true){let found=false;outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){const cur=board[y][x];if(!cur)continue;if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x,y+1,newLvl);found=true;didMerge=true;break outer}if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x+1,y,newLvl);found=true;didMerge=true;break outer}}if(!found)break;settle()}return{didMerge,isDragonMerge}}
 function mergeCells(x1,y1,x2,y2,newLvl){board[y2][x2].lvl=newLvl;board[y1][x1]=null;addScore(newLvl,x2,y2);if(!firstMergeLogged){firstMergeLogged=true;logEvent("First_Merge");}gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),150);if(newLvl>=5)sound(420,.18);else if(newLvl>=3)sound(600,.12);else sound(800,.08);}
 function addScore(lvl,x,y){let points=10*lvl;if(lvl>=6)points=100*(lvl-5);score+=points;updateHUD();const pop=document.createElement("div");pop.className="scorepop";pop.style.left=x*CELL+CELL/3+"px";pop.style.top=y*CELL+"px";pop.textContent="+"+points;gameEl.appendChild(pop);setTimeout(()=>pop.remove(),650)}
 function settle(){for(let x=0;x<W;x++){let write=H-1;for(let y=H-1;y>=0;y--)if(board[y][x]){if(write!==y){board[write][x]=board[y][x];board[y][x]=null}write--}}}
@@ -186,11 +204,7 @@ function gameOverFn(){
 function watchAdContinue(){
   if(hasUsedContinue)return;const btn=document.getElementById("adBtn");btn.disabled=true;btn.textContent="LOADING AD...";
   if(!crazyReady||!window.CrazyGames?.SDK?.ad){btn.disabled=false;btn.textContent="AD UNAVAILABLE";return}
-  window.CrazyGames.SDK.ad.requestAd("rewarded",{
-    adStarted:()=>{if(audioCtx&&audioCtx.state==="running")audioCtx.suspend().catch(()=>{})},
-    adFinished:()=>{logEvent("Ad_Watched");hasUsedContinue=true;if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});doContinue()},
-    adError:(error)=>{console.log("Rewarded ad failed:",error);if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});btn.disabled=false;btn.textContent="📺 WATCH AD & CONTINUE"}
-  })
+  window.CrazyGames.SDK.ad.requestAd("rewarded",{adStarted:()=>{if(audioCtx&&audioCtx.state==="running")audioCtx.suspend().catch(()=>{})},adFinished:()=>{logEvent("Ad_Watched");hasUsedContinue=true;if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});doContinue()},adError:(error)=>{console.log("Rewarded ad failed:",error);if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});btn.disabled=false;btn.textContent="📺 WATCH AD & CONTINUE"}})
 }
 
 function doContinue(){for(let y=0;y<4;y++)for(let x=0;x<W;x++)board[y][x]=null;settle();gameOver=false;document.getElementById("gameover").style.display="none";setMessage("CONTINUE! KEEP MERGING!","good")}
@@ -202,14 +216,15 @@ function startGame(fromReplay=false){
   document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard();
 }
 
-gameEl.addEventListener("click",e=>{
-  if(gameOver||busy) return;
-  updateCellSize();
+gameEl.addEventListener("pointerdown", e => {
+  if(gameOver || busy || !board) return;
+  e.preventDefault();
   const rect = gameEl.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const col = getColFromX(x);
-  if(col >= 0 && col < W) drop(col);
-})
+  const x = e.clientX - rect.left - gameEl.clientLeft;
+  if(x < 0 || x > gameEl.clientWidth){ return; }
+  const col = getColFromX(x + gameEl.clientLeft);
+  drop(col);
+});
 
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
 window.addEventListener('resize', updateCellSize);
