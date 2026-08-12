@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Eat to Evolve v1.1.2</title>
+<title>Eat to Evolve v1.1.5</title>
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
 :root{ --cell:64px; --board-w:320px; --board-h:448px; --gold:#ffcc00; --green:#45ff72; --accent:#38bdf8; }
@@ -28,7 +28,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;ba
 #nextCreature{font-size:29px;min-width:34px;text-align:center}
 #message{height:25px;display:flex;align-items:center;justify-content:center;color:#aeb8c8;font-size:11px;font-weight:800;margin-bottom:5px;text-align:center;transition:color.2s}
 .messageGood{color:var(--green)!important}.messageBad{color:var(--gold)!important}
-#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell),var(--cell) var(--cell),100% 100%;box-shadow:0 15px 40px rgba(0,0,0,.55),inset 0 0 35px rgba(0,0,0,.45)}
+#game{width:var(--board-w);height:var(--board-h);position:relative;overflow:hidden;border:2px solid #34445c;border-radius:12px;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(180deg,#101721,#0b1017);background-size:var(--cell) var(--cell),var(--cell) var(--cell),100% 100%;box-shadow:0 15px 40px rgba(0,0,0,.55),inset 0 0 35px rgba(0,0,0,.45);cursor:pointer}
 .columnGlow{position:absolute;top:0;bottom:0;width:var(--cell);pointer-events:none;background:linear-gradient(180deg,rgba(255,204,0,.04),transparent 35%)}
 .cell{position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:clamp(28px,8vw,38px);transition:left 100ms ease,top 100ms ease;z-index:5;user-select:none}
 .lvltext{position:absolute;right:4px;bottom:3px;color:#c8d0dc;font-size:9px;font-weight:900;text-shadow:0 1px 3px #000}
@@ -38,45 +38,37 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;ba
 .rising{animation:boardRise 300ms ease}@keyframes boardRise{0%{transform:translateY(18px)}50%{transform:translateY(-2px)}100%{transform:translateY(0)}}
 .goldflash{position:absolute;inset:0;z-index:50;pointer-events:none;background:radial-gradient(circle,rgba(255,215,0,.75),transparent 65%);animation:goldFlash 500ms ease forwards}@keyframes goldFlash{from{opacity:1}to{opacity:0}}
 .scorepop{position:absolute;color:var(--gold);font-size:15px;font-weight:900;z-index:60;pointer-events:none;text-shadow:0 2px 4px #000;animation:scorePop 650ms ease forwards}@keyframes scorePop{from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-28px) scale(1.2);opacity:0}}
-#tapzones{width:100%;display:flex;gap:5px;margin-top:7px}
-.zone{flex:1;height:46px;border:1px solid #334156;border-radius:9px;background:linear-gradient(180deg,#202b3b,#131b27);color:#9eacbf;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:900;transition:all.1s}
-.zone span{font-size:9px;color:#68778d}.zone:active{background:#1e3327;border-color:var(--green);color:white;transform:translateY(2px)}
+#tapzones{display:none}
 #gameover{position:absolute;inset:0;background:rgba(2,4,7,.95);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:100;border-radius:12px;text-align:center}
 #gameover h2{margin:0 0 6px;font-size:30px}.finalScore{font-size:17px}.finalBest{color:#aeb8c8;margin-bottom:8px}
 #gameover button{width:220px;padding:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:15px;font-weight:900}
 #gameover button.secondary{background:#29313d;color:white}#gameover button:disabled{background:#222;color:#666}
-@media(max-width:380px){:root{--cell:56px;--board-w:280px;--board-h:392px}.zone{height:42px}}
+@media(max-width:380px){:root{--cell:56px;--board-w:280px;--board-h:392px}}
 </style>
 </head>
 <body>
 <div id="wrapper">
   <div id="hud" style="display:none"><div class="hudCard"><span class="hudLabel">Score</span><span class="hudValue" id="score">0</span></div><div class="hudCard"><span class="hudLabel">Best</span><span class="hudValue" id="best">0</span></div></div>
   <div id="topbar" style="display:none"><div id="nextBox"><span class="nextLabel">NEXT</span><span id="nextCreature">🐜</span></div></div>
-  <div id="message" style="display:none">CHOOSE A COLUMN</div>
+  <div id="message" style="display:none">TAP A COLUMN TO DROP</div>
   <div id="game">
     <div class="columnGlow" style="left:0"></div><div class="columnGlow" style="left:var(--cell)"></div><div class="columnGlow" style="left:calc(var(--cell)*2)"></div><div class="columnGlow" style="left:calc(var(--cell)*3)"></div><div class="columnGlow" style="left:calc(var(--cell)*4)"></div>
     <div id="gameover"><h2>GAME OVER</h2><div class="finalScore">Score: <span id="finalScore">0</span></div><div class="finalBest">Best: <span id="finalBest">0</span></div><button id="adBtn" onclick="watchAdContinue()">📺 WATCH AD & CONTINUE</button><button class="secondary" onclick="shareScore()">📤 SHARE SCORE</button><button class="secondary" onclick="startGame(true)">PLAY AGAIN</button></div>
   </div>
-  <div id="tapzones" style="display:none"><button class="zone" data-col="0">▼<span>1</span></button><button class="zone" data-col="1">▼<span>2</span></button><button class="zone" data-col="2">▼<span>3</span></button><button class="zone" data-col="3">▼<span>4</span></button><button class="zone" data-col="4">▼<span>5</span></button></div>
+  <div id="tapzones"></div>
 </div>
 <div id="screen"><h1>EAT TO EVOLVE</h1><div class="subtitle">Drop • Merge • Evolve • Survive</div><div class="bestTitle">BEST: <strong id="titleBest">0</strong></div><button id="playBtn" onclick="startGame(false)" disabled>LOADING...</button></div>
 <script>
 const W=5,H=7;const CREATURES=[{name:"Ant",emoji:"🐜",lvl:1,weight:40},{name:"Cockroach",emoji:"🪳",lvl:2,weight:30},{name:"Bird",emoji:"🐦",lvl:3,weight:20},{name:"Lizard",emoji:"🦎",lvl:4,weight:9},{name:"Crocodile",emoji:"🐊",lvl:5,weight:1}];
 let board,score=0,best=0,nextCreature=null,gameOver=false,busy=false,hasUsedContinue=false,audioCtx=null,crazyReady=false,sessionStart=0,mergeCount=0,highestLvl=1;
-let firstMergeLogged=false, dragonLogged=false; // FIX 1 & 2
+let firstMergeLogged=false, dragonLogged=false;
 const gameEl=document.getElementById("game"),messageEl=document.getElementById("message"),nextEl=document.getElementById("nextCreature");
 
 // ===== ANALYTICS =====
-function logEvent(name, data={}){
-  console.log(`[ANALYTICS] ${name}`, data);
-  // CrazyGames Telemetry
-  try{
-    if(window.CrazyGames?.SDK?.game){
-      if(name==="Game_Start_Click") window.CrazyGames.SDK.gameplayStart();
-      if(name==="Game_Over") window.CrazyGames.SDK.game.gameplayStop();
-    }
-  }catch(e){}
-}
+function logEvent(name, data={}){console.log(`[ANALYTICS] ${name}`, data);}
+
+function cgGameplayStart(){try{if(window.CrazyGames?.SDK?.game?.gameplayStart)window.CrazyGames.SDK.gameplayStart();}catch(e){}}
+function cgGameplayStop(){try{if(window.CrazyGames?.SDK?.game?.gameplayStop)window.CrazyGames.SDK.gameplayStop();}catch(e){}}
 
 // ===== CORE =====
 function getCell(){return gameEl.clientWidth/W}
@@ -87,9 +79,11 @@ function randCreature(){const total=CREATURES.reduce((a,b)=>a+b.weight,0);let r=
 
 function initBoard(){
   board=Array.from({length:H},()=>Array(W).fill(null));score=0;gameOver=false;busy=false;hasUsedContinue=false;mergeCount=0;highestLvl=1;
-  firstMergeLogged=false; dragonLogged=false; // RESET FLAGS
+  firstMergeLogged=false; dragonLogged=false;
   best=parseInt(localStorage.getItem("eatEvolveBest")||"0");nextCreature=randCreature();
-  updateHUD();updateNext();setMessage("NEXT CREATURE READY — CHOOSE A COLUMN");render();logEvent("Game_Start");
+  updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();
+  logEvent("Game_Start"); // Only fires when board is ready
+  cgGameplayStart(); // CrazyGames official start
 }
 
 function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("best").textContent=best;document.getElementById("titleBest").textContent=best}
@@ -101,32 +95,48 @@ async function animateDrop(col,creature,row){const CELL=getCell();const falling=
 
 async function drop(col){
   if(gameOver||busy)return;busy=true;if(sessionStart===0){sessionStart=Date.now();logEvent("First_Drop")}
-  let row=H-1;while(row>=0&&board[row][col])row--;if(row<0){setMessage("COLUMN FULL — TRY ANOTHER","bad");sound(90,.15);busy=false;return}
+  let row=H-1;while(row>=0&&board[row][col])row--;
+  if(row<0){setMessage("COLUMN FULL — TRY ANOTHER","bad");sound(90,.15);busy=false;return}
   const creature={...nextCreature};nextCreature=randCreature();updateNext();setMessage("FALLING...");await animateDrop(col,creature,row);
-  board[row][col]=creature;render();sound(260,.08);const result=resolveMerges();
+  board[row][col]=creature;sound(260,.08);
+
+  const result=resolveMerges();render();
+
   if(result.didMerge){
     mergeCount++;
-    // FIX 2: Dragon only logs once
     if(result.isDragonMerge &&!dragonLogged){dragonLogged=true;logEvent("Dragon_Reached",{lvl:highestLvl});}
     setMessage(result.isDragonMerge?"🐲 EVOLUTION!":"MERGE!","good");gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),160);if(result.isDragonMerge)playDragonEffect();
-  }else{setMessage("NO MERGE — BOARD RISES!","bad");await sleep(220);if(!addPressureRow()){busy=false;gameOverFn();return}}
+  }else{
+    setMessage("NO MERGE — BOARD RISES!","bad");await sleep(220);if(!addPressureRow()){busy=false;gameOverFn();return}
+  }
   if(board[0].some(cell=>cell)){busy=false;gameOverFn();return}busy=false;
 }
 
-function resolveMerges(){let didMerge=false,isDragonMerge=false;while(true){let found=false;outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){const cur=board[y][x];if(!cur)continue;
-if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x+1,y,newLvl);found=true;didMerge=true;break outer}
-if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;if(newLvl>=6)isDragonMerge=true;mergeCells(x,y,x,y+1,newLvl);found=true;didMerge=true;break outer}}
-if(!found)break;settle()}return{didMerge,isDragonMerge}}
-
-function mergeCells(x1,y1,x2,y2,newLvl){
-  board[y2][x2].lvl=newLvl;board[y1][x1]=null;addScore(newLvl,x2,y2);
-  // FIX 1: First merge logs on ANY merge
-  if(!firstMergeLogged){firstMergeLogged=true;logEvent("First_Merge");}
-  gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),150);if(newLvl>=5)sound(420,.18);else if(newLvl>=3)sound(600,.12);else sound(800,.08);
+function resolveMerges(){
+  let didMerge=false,isDragonMerge=false;
+  while(true){
+    let found=false;
+    outer:for(let y=H-1;y>=0;y--)for(let x=0;x<W;x++){
+      const cur=board[y][x];if(!cur)continue;
+      if(y+1<H&&board[y+1][x]&&board[y+1][x].lvl===cur.lvl){
+        const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;
+        if(newLvl>=6)isDragonMerge=true;
+        mergeCells(x,y,x,y+1,newLvl);found=true;didMerge=true;break outer
+      }
+      if(x+1<W&&board[y][x+1]&&board[y][x+1].lvl===cur.lvl){
+        const newLvl=cur.lvl+1;if(newLvl>highestLvl)highestLvl=newLvl;
+        if(newLvl>=6)isDragonMerge=true;
+        mergeCells(x,y,x+1,y,newLvl);found=true;didMerge=true;break outer
+      }
+    }
+    if(!found)break;settle()
+  }
+  return{didMerge,isDragonMerge}
 }
 
+function mergeCells(x1,y1,x2,y2,newLvl){board[y2][x2].lvl=newLvl;board[y1][x1]=null;addScore(newLvl,x2,y2);if(!firstMergeLogged){firstMergeLogged=true;logEvent("First_Merge");}gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),150);if(newLvl>=5)sound(420,.18);else if(newLvl>=3)sound(600,.12);else sound(800,.08);}
 function addScore(lvl,x,y){let points=10*lvl;if(lvl>=6)points=100*(lvl-5);score+=points;updateHUD();const CELL=getCell();const pop=document.createElement("div");pop.className="scorepop";pop.style.left=x*CELL+CELL/3+"px";pop.style.top=y*CELL+"px";pop.textContent="+"+points;gameEl.appendChild(pop);setTimeout(()=>pop.remove(),650)}
-function settle(){for(let x=0;x<W;x++){let write=H-1;for(let y=H-1;y>=0;y--)if(board[y][x]){if(write!==y){board[write][x]=board[y][x];board[y][x]=null}write--}}render()}
+function settle(){for(let x=0;x<W;x++){let write=H-1;for(let y=H-1;y>=0;y--)if(board[y][x]){if(write!==y){board[write][x]=board[y][x];board[y][x]=null}write--}}}
 function addPressureRow(){if(board[0].some(cell=>cell))return false;for(let y=0;y<H-1;y++)board[y]=[...board[y+1]];const newRow=Array(W).fill(null);for(let x=0;x<W;x++)if(Math.random()<.6)newRow[x]=randCreature();board[H-1]=newRow;gameEl.classList.add("rising");setTimeout(()=>gameEl.classList.remove("rising"),300);render();return true;}
 function playDragonEffect(){sound(80,.35);setTimeout(()=>sound(1000,.25),130);setTimeout(()=>sound(1500,.2),250);const flash=document.createElement("div");flash.className="goldflash";gameEl.appendChild(flash);setTimeout(()=>flash.remove(),500)}
 function getEmojiByLvl(lvl){if(lvl<=5)return["","🐜","🪳","🐦","🦎","🐊"][lvl];const d=lvl-5;if(d===1)return"🐲";if(d===2)return"🐲👑";if(d===3)return"🐲👑";return"🐲🔥"}
@@ -134,6 +144,7 @@ function getEmojiByLvl(lvl){if(lvl<=5)return["","🐜","🪳","🐦","🦎","�
 function gameOverFn(){
   gameOver=true;const sessionDuration=Math.floor((Date.now()-sessionStart)/1000);
   logEvent("Game_Over",{score,highestLvl,mergeCount,sessionDuration});
+  cgGameplayStop(); // CrazyGames official stop
   if(score>best){best=score;localStorage.setItem("eatEvolveBest",best)}
   updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("finalBest").textContent=best;
   const adBtn=document.getElementById("adBtn");adBtn.disabled=hasUsedContinue;adBtn.textContent=hasUsedContinue?"USED":"📺 WATCH AD & CONTINUE";
@@ -154,14 +165,22 @@ function doContinue(){for(let y=0;y<4;y++)for(let x=0;x<W;x++)board[y][x]=null;s
 
 function shareScore(){const text=`I scored ${score} in Eat to Evolve! 🐲🔥 Can you beat me?`;if(navigator.share){navigator.share({title:"Eat to Evolve",text}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text)}}
 
-// FIX 3: Pass fromReplay flag
 function startGame(fromReplay=false){
-  if(fromReplay) logEvent("Play_Again"); else logEvent("Game_Start_Click");
+  if(fromReplay) logEvent("Play_Again"); else logEvent("Game_Start_Click"); // Button press only
   initAudio();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});
-  document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("tapzones").style.display="flex";document.getElementById("gameover").style.display="none";initBoard();
+  document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard(); // initBoard does Game_Start
 }
 
-document.getElementById("tapzones").addEventListener("click",e=>{const zone=e.target.closest(".zone");if(!zone)return;drop(parseInt(zone.dataset.col))});
+// TAP ANYWHERE ON BOARD
+gameEl.addEventListener("click",e=>{
+  if(gameOver||busy) return;
+  const rect = gameEl.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const CELL = getCell();
+  const col = Math.floor(x / CELL);
+  if(col >= 0 && col < W) drop(col);
+})
+
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}initCrazyGames();
 </script>
 </body>
