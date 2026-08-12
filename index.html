@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Eat to Evolve v1.1.5</title>
+<title>Eat to Evolve v1.1.7</title>
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
 :root{ --cell:64px; --board-w:320px; --board-h:448px; --gold:#ffcc00; --green:#45ff72; --accent:#38bdf8; }
@@ -66,8 +66,7 @@ const gameEl=document.getElementById("game"),messageEl=document.getElementById("
 
 // ===== ANALYTICS =====
 function logEvent(name, data={}){console.log(`[ANALYTICS] ${name}`, data);}
-
-function cgGameplayStart(){try{if(window.CrazyGames?.SDK?.game?.gameplayStart)window.CrazyGames.SDK.gameplayStart();}catch(e){}}
+function cgGameplayStart(){try{if(window.CrazyGames?.SDK?.game?.gameplayStart)window.CrazyGames.SDK.game.gameplayStart();}catch(e){}}
 function cgGameplayStop(){try{if(window.CrazyGames?.SDK?.game?.gameplayStop)window.CrazyGames.SDK.gameplayStop();}catch(e){}}
 
 // ===== CORE =====
@@ -82,8 +81,7 @@ function initBoard(){
   firstMergeLogged=false; dragonLogged=false;
   best=parseInt(localStorage.getItem("eatEvolveBest")||"0");nextCreature=randCreature();
   updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();
-  logEvent("Game_Start"); // Only fires when board is ready
-  cgGameplayStart(); // CrazyGames official start
+  logEvent("Game_Start");cgGameplayStart();
 }
 
 function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("best").textContent=best;document.getElementById("titleBest").textContent=best}
@@ -95,16 +93,16 @@ async function animateDrop(col,creature,row){const CELL=getCell();const falling=
 
 async function drop(col){
   if(gameOver||busy)return;busy=true;if(sessionStart===0){sessionStart=Date.now();logEvent("First_Drop")}
-  let row=H-1;while(row>=0&&board[row][col])row--;
-  if(row<0){setMessage("COLUMN FULL — TRY ANOTHER","bad");sound(90,.15);busy=false;return}
+  let topOccupied = -1;
+  for(let y=0; y<H; y++){if(board[y][col]){ topOccupied = y; break; }}
+  let row = topOccupied - 1;
+  if(row < 0){setMessage("COLUMN FULL — TRY ANOTHER","bad");sound(90,.15);busy=false;return}
   const creature={...nextCreature};nextCreature=randCreature();updateNext();setMessage("FALLING...");await animateDrop(col,creature,row);
   board[row][col]=creature;sound(260,.08);
-
   const result=resolveMerges();render();
-
   if(result.didMerge){
     mergeCount++;
-    if(result.isDragonMerge &&!dragonLogged){dragonLogged=true;logEvent("Dragon_Reached",{lvl:highestLvl});}
+    if(result.isDragonMerge &&!dragonLogged){dragonLogged=true;logEvent("dragon_reached",{lvl:highestLvl});} // FIXED: lowercase
     setMessage(result.isDragonMerge?"🐲 EVOLUTION!":"MERGE!","good");gameEl.classList.add("shake");setTimeout(()=>gameEl.classList.remove("shake"),160);if(result.isDragonMerge)playDragonEffect();
   }else{
     setMessage("NO MERGE — BOARD RISES!","bad");await sleep(220);if(!addPressureRow()){busy=false;gameOverFn();return}
@@ -144,7 +142,7 @@ function getEmojiByLvl(lvl){if(lvl<=5)return["","🐜","🪳","🐦","🦎","�
 function gameOverFn(){
   gameOver=true;const sessionDuration=Math.floor((Date.now()-sessionStart)/1000);
   logEvent("Game_Over",{score,highestLvl,mergeCount,sessionDuration});
-  cgGameplayStop(); // CrazyGames official stop
+  cgGameplayStop();
   if(score>best){best=score;localStorage.setItem("eatEvolveBest",best)}
   updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("finalBest").textContent=best;
   const adBtn=document.getElementById("adBtn");adBtn.disabled=hasUsedContinue;adBtn.textContent=hasUsedContinue?"USED":"📺 WATCH AD & CONTINUE";
@@ -162,16 +160,14 @@ function watchAdContinue(){
 }
 
 function doContinue(){for(let y=0;y<4;y++)for(let x=0;x<W;x++)board[y][x]=null;settle();gameOver=false;document.getElementById("gameover").style.display="none";setMessage("CONTINUE! KEEP MERGING!","good")}
-
 function shareScore(){const text=`I scored ${score} in Eat to Evolve! 🐲🔥 Can you beat me?`;if(navigator.share){navigator.share({title:"Eat to Evolve",text}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text)}}
 
 function startGame(fromReplay=false){
-  if(fromReplay) logEvent("Play_Again"); else logEvent("Game_Start_Click"); // Button press only
+  if(fromReplay) logEvent("Play_Again"); else logEvent("Game_Start_Click");
   initAudio();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume().catch(()=>{});
-  document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard(); // initBoard does Game_Start
+  document.getElementById("screen").style.display="none";document.getElementById("hud").style.display="flex";document.getElementById("topbar").style.display="flex";document.getElementById("message").style.display="flex";document.getElementById("gameover").style.display="none";initBoard();
 }
 
-// TAP ANYWHERE ON BOARD
 gameEl.addEventListener("click",e=>{
   if(gameOver||busy) return;
   const rect = gameEl.getBoundingClientRect();
@@ -184,4 +180,4 @@ gameEl.addEventListener("click",e=>{
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}initCrazyGames();
 </script>
 </body>
-</html>
+  </html>
