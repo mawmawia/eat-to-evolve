@@ -28,9 +28,8 @@ body{color:white;display:flex;flex-direction:column;align-items:center}
 .bestBox strong{color:white;font-size:15px;margin-left:5px;}
 #playBtn{width:240px;padding:16px;border:0;border-radius:14px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:18px;font-weight:900;box-shadow:0 8px 25px rgba(255,204,0,.25);}
 #playBtn:active{transform:scale(.98);}
-.version{margin-top:16px;color:#47556b;font-size:10px;font-weight:800;letter-spacing:1px;}
 #topbar{width:100%;max-width:400px;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:#0a0f16;border-bottom:1px solid #1a2433;flex-shrink:0}
-.topBtn{background:#151d2a;border:1px solid #29364a;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800;color:#c8d0dc}
+.topBtn{background:#151d2a;border:1px solid #29364a;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800;color:#c8d0dc;cursor:pointer}
 .title{font-size:10px;font-weight:950;letter-spacing:1px;color:#d7dee9}
 #gameWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;width:100%}
 #hud{width:var(--board-w);display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -42,7 +41,7 @@ body{color:white;display:flex;flex-direction:column;align-items:center}
 #skills{position:fixed;bottom:70px;right:10px;display:flex;gap:8px;z-index:10}
 .skillBtn{width:52px;height:52px;border-radius:14px;border:2px solid #29364a;background:linear-gradient(180deg,#151d2a,#0d131d);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8290a6;font-size:22px}
 .skillBtn.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 15px rgba(255,204,0,.18)}
-.skillBtn.adbusy{opacity:.5;pointer-events:none}
+.skillBtn.empty{opacity:.6}
 .skillCount{font-size:10px;font-weight:900}
 #bottombar{width:100%;max-width:400px;height:60px;display:flex;align-items:center;justify-content:space-around;background:#0a0f16;border-top:1px solid #1a2433;flex-shrink:0}
 .botBtn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#8290a6;font-weight:800;cursor:pointer;min-width:52px}
@@ -55,65 +54,86 @@ body{color:white;display:flex;flex-direction:column;align-items:center}
 .messageGood{color:var(--green)!important}.messageBad{color:var(--gold)!important}
 #gameover{position:absolute;inset:0;background:rgba(2,4,7,.95);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:100;border-radius:12px;text-align:center}
 #gameover button{width:220px;padding:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd52a,#ffbd00);color:#080808;font-size:15px;font-weight:900}
-/* SHARE BUTTON STYLE */
-#shareBtn{
-  background:linear-gradient(180deg,#182333,#101823)!important;
-  color:#ffffff!important;
-  border:1px solid #34445c!important;
-  box-shadow:none!important;
-}
-#shareBtn:active{
-  transform:scale(.98);
-}
+#reviveBtn{background:linear-gradient(180deg,#45ff72,#2ecc5d)!important;color:#000!important;}
+#newGameBtn{background:linear-gradient(180deg,#ffd52a,#ffbd00)!important;color:#080808!important;}
+#shareBtn{background:linear-gradient(180deg,#182333,#101823)!important;color:#ffffff!important;border:1px solid #34445c!important;box-shadow:none!important;}
 #modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:900;padding:20px;}
 #modalBackdrop.show{display:flex;}
 .modal{width:min(340px,92vw);background:linear-gradient(180deg,#151d2a,#0b111a);border:1px solid #33445e;border-radius:18px;padding:24px 20px 20px;text-align:center;box-shadow:0 20px 70px rgba(0,0,0,.55);animation:modalIn.22s ease;}
 @keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .modalIcon{font-size:42px;margin-bottom:8px;}
 .modal h2{margin:0 0 8px;font-size:20px;}
-.modal p{margin:0;color:#8290a6;font-size:13px;line-height:1.5;white-space:pre-line;}
+.modal p{margin:0;color:#8290a6;font-size:13px;line-height:1.5;white-space:pre-line;text-align:left;}
+.modalBtns{display:flex;gap:10px;margin-top:18px}
+.modalBtns button{flex:1;padding:11px;border:1px solid #34445c;border-radius:10px;background:#151d2a;color:white;font-weight:900;}
+.modalBtns.primary{background:linear-gradient(180deg,#45ff72,#2ecc5d);color:#000;border:0}
 .modal.soon{display:inline-block;margin-top:14px;padding:6px 10px;border-radius:8px;background:#0d151f;border:1px solid #26344b;color:#ffcc00;font-size:10px;font-weight:900;letter-spacing:1px;}
 .modalClose{margin-top:18px;width:100%;padding:11px;border:1px solid #34445c;border-radius:10px;background:#151d2a;color:white;font-weight:900;}
 </style>
 </head>
 <body>
 <div id="bootScreen"><div class="bootDna">🧬</div><div class="bootText">LOADING...</div><div class="loadTrack"><div class="loadFill"></div></div></div>
-<div id="screen"><div class="logoCreature">🐜</div><div class="logo">EAT TO EVOLVE</div><div class="mergeTitle">MERGE</div><div class="tag">Drop • Merge • Evolve • Survive</div><div class="bestBox">BEST: <strong id="titleBest">0</strong></div><button id="playBtn" onclick="startGame(false)">PLAY</button><div class="version">v1.3.8</div></div>
-<div id="topbar" style="display:none"><div class="topBtn" id="profileTop">👤 Guest</div><div class="title">EAT TO EVOLVE: MERGE</div><div class="topBtn soundBtn"><span class="soundIcon">🔊</span></div></div>
+<div id="screen"><div class="logoCreature">🐜</div><div class="logo">EAT TO EVOLVE</div><div class="mergeTitle">MERGE</div><div class="tag">Drop • Merge • Evolve • Survive</div><div class="bestBox">BEST: <strong id="titleBest">0</strong></div><button id="playBtn" onclick="startGame(false)">PLAY</button></div>
+<div id="topbar" style="display:none"><div class="topBtn" id="profileTop">👤 Guest</div><div class="title">EAT TO EVOLVE: MERGE</div><div class="topBtn" onclick="openPanel('howto')">📝 How</div></div>
 <div id="gameWrap" style="display:none"><div id="hud"><div class="hudCard"><span class="hudLabel">Score</span><span class="hudValue" id="score">0</span></div><div class="hudCard"><span class="hudLabel">Best</span><span class="hudValue" id="best">0</span></div></div><div id="nextBox"><span>NEXT</span><span id="nextCreature">🐜</span></div><div id="message">TAP A COLUMN TO DROP</div><div id="game"></div></div>
 <div id="skills" style="display:none"><div id="skill1" class="skillBtn locked" onclick="handleSkillClick(1)">⚡<div class="skillCount" id="count1">🔒</div></div><div id="skill2" class="skillBtn locked" onclick="handleSkillClick(2)">✚<div class="skillCount" id="count2">🔒</div></div><div id="skill3" class="skillBtn locked" onclick="handleSkillClick(3)">💣<div class="skillCount" id="count3">🔒</div></div><div id="skill4" class="skillBtn locked" onclick="handleSkillClick(4)">🧬<div class="skillCount" id="count4">🔒</div></div></div>
 <div id="bottombar" style="display:none"><div class="botBtn" onclick="openPanel('profile')">👤<span>Profile</span></div><div class="botBtn soundBtn"><span class="soundIcon">🔊</span><span>Sound</span></div><div class="botBtn" onclick="openPanel('leaderboard')">🏆<span>Leaderboard</span></div><div class="botBtn" onclick="openPanel('daily')">📅<span>Daily</span></div><div class="botBtn" onclick="openPanel('shop')">🛍️<span>Shop</span></div></div>
-<!-- GAME OVER WITH SHARE -->
-<div id="gameover">
-  <h2>GAME OVER</h2>
-  <div>Score: <span id="finalScore">0</span></div>
-  <button onclick="startGame(true)">PLAY AGAIN</button>
-  <button id="shareBtn" onclick="shareScore()">SHARE SCORE</button>
-</div>
-<div id="modalBackdrop" onclick="closePanel(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modalIcon" id="modalIcon">🧬</div><h2 id="modalTitle">COMING SOON</h2><p id="modalText">Coming soon.</p><div class="soon">COMING SOON</div><button class="modalClose" onclick="closePanel()">CLOSE</button></div></div>
+<div id="gameover"><h2>GAME OVER</h2><div>Score: <span id="finalScore">0</span></div><button id="reviveBtn" onclick="attemptRevive()">WATCH AD & CONTINUE</button><button id="newGameBtn" onclick="startGame(true)">NEW GAME</button><button id="shareBtn" onclick="shareScore()">SHARE SCORE</button></div>
+<div id="modalBackdrop" onclick="closePanel(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modalIcon" id="modalIcon">🧬</div><h2 id="modalTitle">COMING SOON</h2><p id="modalText">Coming soon.</p><div class="modalBtns" id="modalBtns" style="display:none"><button onclick="closePanel()">CANCEL</button><button class="primary" id="modalPrimaryBtn">WATCH AD</button></div><div class="soon" id="modalSoon">COMING SOON</div><button class="modalClose" id="modalCloseBtn" onclick="closePanel()">CLOSE</button></div></div>
 <script>
 const W=5,H=7;const CREATURES=[{name:"Ant",emoji:"🐜",lvl:1,weight:40},{name:"Cockroach",emoji:"🪳",lvl:2,weight:30},{name:"Bird",emoji:"🐦",lvl:3,weight:20},{name:"Lizard",emoji:"🦎",lvl:4,weight:9},{name:"Crocodile",emoji:"🐊",lvl:5,weight:1}];
 let board,score=0,best=0,nextCreature=null,gameOver=false,busy=false,CELL=56;
-let highestLvl=1, skillUnlocked=[false,false,false,false], skillCharges=[0,0,0,0], adBusy=[false,false,false,false], activeSkill=null, soundOn=true;
-let sdkReady=false, loadedSave=null; const gameEl=document.getElementById("game");
-const panelData={profile:{icon:"👤",title:"Profile",text:"COMING SOON\nConnect to CrazyGames profile 🧬"},leaderboard:{icon:"🏆",title:"Leaderboard",text:"COMING SOON\nGlobal rankings coming 🧬"},daily:{icon:"📅",title:"Daily Rewards",text:"COMING SOON\nDaily rewards coming 🧬"},shop:{icon:"🛍️",title:"Shop",text:"COMING SOON\nSkins & boosters coming 🧬"}};
-function openPanel(type){if(gameOver)return;const p=panelData[type];if(!p)return;document.getElementById("modalIcon").textContent=p.icon;document.getElementById("modalTitle").textContent=p.title;document.getElementById("modalText").textContent=p.text;document.getElementById("modalBackdrop").classList.add("show");if(window.CrazyGames?.SDK?.game?.gameplayStop){try{window.CrazyGames.SDK.gameplayStop();}catch(e){}}logEvent("panel_open",{panel:type});}
-function closePanel(event){if(event&&event.target!==document.getElementById("modalBackdrop")){return;}document.getElementById("modalBackdrop").classList.remove("show");if(!gameOver&&board&&window.CrazyGames?.SDK?.game?.gameplayStart){try{window.CrazyGames.SDK.gameplayStart();}catch(e){}}}
-async function initCrazyGames(){const boot=document.getElementById("bootScreen");const sdk=window.CrazyGames?.SDK;const host=location.hostname;try{const env=sdk?.environment;const isLocal=host==="localhost"||host==="127.0.0.1";if(sdk&&(env!=="disabled"||isLocal)){if(sdk.game?.loadingStart){try{sdk.game.loadingStart();}catch(e){}}const initResult=await Promise.race([sdk.init().then(()=>true).catch(()=>false),new Promise(resolve=>setTimeout(()=>resolve(false),5000))]);if(initResult){sdkReady=true;try{loadedSave=loadGame();}catch(e){loadedSave=null;}logEvent("SDK_Ready");}else{console.warn("CrazyGames SDK initialization failed or timed out.");sdkReady=false;}if(sdk.game?.loadingStop){try{sdk.game.loadingStop();}catch(e){}}}else{console.log("CrazyGames SDK disabled on this host:",host);sdkReady=false;}}catch(e){console.warn("CrazyGames SDK unavailable:",e);sdkReady=false;loadedSave=null;}const localBest=parseInt(localStorage.getItem("eatEvolveBest")||"0",10)||0;if(!loadedSave){loadedSave={best:localBest};best=localBest;}setTimeout(()=>{boot.style.opacity="0";setTimeout(()=>{boot.style.display="none";document.getElementById("screen").classList.add("show");document.getElementById("titleBest").textContent=loadedSave?.best||0;},550);},1250);}
+let highestLvl=1, skillUnlocked=[false,false], skillCharges=[0,0,0,0], adBusy=[false,false], activeSkill=null, soundOn=true, reviveCooldownGames=0;
+let sdkReady=false, pendingSkillAd=0; const gameEl=document.getElementById("game");
+const panelData={profile:{icon:"👤",title:"Profile",text:"COMING SOON\nConnect to CrazyGames profile 🧬"},leaderboard:{icon:"🏆",title:"Leaderboard",text:"COMING SOON\nGlobal rankings coming 🧬"},daily:{icon:"📅",title:"Daily Rewards",text:"COMING SOON\nDaily rewards coming 🧬"},shop:{icon:"🛍️",title:"Shop",text:"COMING SOON\nSkins & boosters coming 🧬"},
+howto:{icon:"📝",title:"HOW TO PLAY",text:"1. TAP A COLUMN TO DROP CREATURE 🐜\n\n2. MERGE 2 IDENTICAL CREATURES\nAnt → Cockroach → Bird → Lizard → Crocodile → DRAGON\n3. UNLOCK DRAGON POWERS\nReach Lv6 ⚡ | Lv7 ✚ | Lv8 💣 | Lv9 🧬\nEach Dragon gives 1 charge\n4. OUT OF CHARGES?\nTap skill to watch ad for +3 uses\n5. GAME OVER?\nWatch Ad to REVIVE: Top 2 rows cleared\n1 Revive per 3 Games\n6. DON'T LET BOARD FILL TO THE TOP!"}};
+function openPanel(type){if(gameOver)return;const p=panelData[type];if(!p)return;document.getElementById("modalIcon").textContent=p.icon;document.getElementById("modalTitle").textContent=p.title;document.getElementById("modalText").textContent=p.text;document.getElementById("modalBtns").style.display="none";document.getElementById("modalSoon").style.display="block";document.getElementById("modalCloseBtn").style.display="block";document.getElementById("modalBackdrop").classList.add("show");if(window.CrazyGames?.SDK?.game?.gameplayStop){try{window.CrazyGames.SDK.gameplayStop();}catch(e){}}logEvent("panel_open",{panel:type});}
+function closePanel(event){if(event&&event.target!==document.getElementById("modalBackdrop")){return;}document.getElementById("modalBackdrop").classList.remove("show");pendingSkillAd=0;if(!gameOver&&board&&window.CrazyGames?.SDK?.game?.gameplayStart){try{window.CrazyGames.SDK.gameplayStart();}catch(e){}}}
+async function initCrazyGames(){const boot=document.getElementById("bootScreen");const sdk=window.CrazyGames?.SDK;try{if(sdk){if(sdk.game?.loadingStart){try{sdk.game.loadingStart();}catch(e){}}await sdk.init();sdkReady=true;const save=await sdk.data.getItem("save");if(save){best=save.best||0;}logEvent("SDK_Ready");if(sdk.game?.loadingStop){try{sdk.game.loadingStop();}catch(e){}}}else{sdkReady=false;}}catch(e){console.warn("CrazyGames SDK unavailable:",e);sdkReady=false;}setTimeout(()=>{boot.style.opacity="0";setTimeout(()=>{boot.style.display="none";document.getElementById("screen").classList.add("show");document.getElementById("titleBest").textContent=best;},550);},1250);}
 initCrazyGames();
-function saveGame(){const data={best,skillUnlocked:[...skillUnlocked],skillCharges:[...skillCharges]};loadedSave={best:data.best,skillUnlocked:[...data.skillUnlocked],skillCharges:[...data.skillCharges]};try{if(sdkReady&&window.CrazyGames?.SDK?.data){window.CrazyGames.SDK.data.setItem("save",JSON.stringify(data));logEvent("save_game");return;}localStorage.setItem("eatEvolveSave",JSON.stringify(data));}catch(e){console.warn("Save failed",e);}}
-function loadGame(){try{let raw=null;if(sdkReady&&window.CrazyGames?.SDK?.data){raw=window.CrazyGames.SDK.data.getItem("save");}else{raw=localStorage.getItem("eatEvolveSave");}if(!raw)return null;const data=JSON.parse(raw);if(data&&typeof data==="object"){best=data.best||0;skillUnlocked=data.skillUnlocked||[false,false,false,false];skillCharges=data.skillCharges||[0,0,0,0];return data;}}catch(e){console.warn("Load failed",e);}return null;}
+async function saveGame(){const data={best};try{if(sdkReady&&window.CrazyGames?.SDK?.data){await window.CrazyGames.SDK.data.setItem("save",data);logEvent("save_game");}}catch(e){console.warn("Save failed",e);}}
 function addSkillCharge(skillId){skillCharges[skillId-1]++;logEvent("skill_recharged",{skill:skillId,charges:skillCharges[skillId-1]});updateSkillsUI();}
-function checkDragonUnlocks(){const unlocks=[{lvl:6,skill:1,icon:"⚡"},{lvl:7,skill:2,icon:"✚"},{lvl:8,skill:3,icon:"💣"},{lvl:9,skill:4,icon:"🧬"}];let changed=false;for(const u of unlocks){const i=u.skill-1;if(highestLvl>=u.lvl&&!skillUnlocked[i]){skillUnlocked[i]=true;skillCharges[i]=1;changed=true;logEvent("dragon_reached",{level:u.skill});logEvent("skill_unlocked",{skill:u.skill});setMessage(`🐲 DRAGON Lv${u.skill} UNLOCKED! ${u.icon}`,"good");}}updateSkillsUI();if(changed){saveGame();}}
-function updateSkillsUI(){for(let i=0;i<4;i++){const btn=document.getElementById("skill"+(i+1)),count=document.getElementById("count"+(i+1));btn.classList.toggle("adbusy",adBusy[i]);if(skillUnlocked[i]){btn.classList.remove("locked");count.textContent=skillCharges[i]>0?skillCharges[i]:"📺3";}else{btn.classList.add("locked");count.textContent="🔒";}}}
-function handleSkillClick(id){const i=id-1;if(!skillUnlocked[i]||adBusy[i]){return;}if(skillCharges[i]===0){watchAdForSkill(id);return;}selectSkill(id);}
+function checkDragonUnlocks(){const unlocks=[{lvl:6,skill:1,icon:"⚡"},{lvl:7,skill:2,icon:"✚"},{lvl:8,skill:3,icon:"💣"},{lvl:9,skill:4,icon:"🧬"}];let changed=false;for(const u of unlocks){const i=u.skill-1;if(highestLvl>=u.lvl&&!skillUnlocked[i]){skillUnlocked[i]=true;skillCharges[i]=1;changed=true;logEvent("dragon_reached",{level:u.skill});logEvent("skill_unlocked",{skill:u.skill});setMessage(`🐲 DRAGON Lv${u.skill} UNLOCKED! ${u.icon}`,"good");}}updateSkillsUI();}
+function updateSkillsUI(){for(let i=0;i<4;i++){const btn=document.getElementById("skill"+(i+1)),count=document.getElementById("count"+(i+1));btn.classList.toggle("adbusy",adBusy[i]);if(skillUnlocked[i]){btn.classList.remove("locked");if(skillCharges[i]>0){count.textContent=skillCharges[i];btn.classList.remove("empty");}else{count.textContent="0";btn.classList.add("empty");}}else{btn.classList.add("locked");count.textContent="🔒";}}}
+function handleSkillClick(id){const i=id-1;if(!skillUnlocked[i]||adBusy[i]){return;}if(skillCharges[i]===0){openSkillAdModal(id);return;}selectSkill(id);}
+function openSkillAdModal(id){pendingSkillAd=id;if(window.CrazyGames?.SDK?.game?.gameplayStop){try{window.CrazyGames.SDK.gameplayStop();}catch(e){}}document.getElementById("modalIcon").textContent=["⚡","✚","💣","🧬"][id-1];document.getElementById("modalTitle").textContent="POWER EMPTY";document.getElementById("modalText").textContent="Watch a short video to receive 3 uses?";document.getElementById("modalBtns").style.display="flex";document.getElementById("modalSoon").style.display="none";document.getElementById("modalCloseBtn").style.display="none";document.getElementById("modalPrimaryBtn").onclick=()=>watchAdForSkill(id);document.getElementById("modalBackdrop").classList.add("show");}
 function selectSkill(id){if(activeSkill){return;}activeSkill=id;document.querySelectorAll(".skillBtn").forEach(b=>{b.classList.remove("active");});document.getElementById("skill"+id).classList.add("active");setMessage("ACTIVE - TAP TARGET","good");}
-function watchAdForSkill(id){const i=id-1;if(adBusy[i])return;if(!window.CrazyGames?.SDK?.ad?.requestAd){setMessage("ADS NOT READY - TRY AGAIN","bad");logEvent("ad_unavailable",{skill:id});return;}adBusy[i]=true;updateSkillsUI();window.CrazyGames.SDK.ad.requestAd("rewarded",{adStarted:()=>{logEvent("ad_started",{skill:id});},adFinished:()=>{skillCharges[i]+=3;adBusy[i]=false;logEvent("skill_ad_watched",{skill:id});logEvent("skill_recharged",{skill:id,charges:skillCharges[i]});updateSkillsUI();setMessage("+3 USES ADDED","good");saveGame();},adError:(error)=>{adBusy[i]=false;updateSkillsUI();setMessage("AD FAILED - TRY AGAIN","bad");logEvent("ad_error",{skill:id,error});}});}
-function useSkill(x,y){const id=activeSkill;activeSkill=null;document.querySelectorAll(".skillBtn").forEach(b=>{b.classList.remove("active");});if(id===4&&!board[y][x]){setMessage("TAP A CREATURE","bad");return;}skillCharges[id-1]--;saveGame();logEvent("skill_used",{skill:id});updateSkillsUI();if(id===1){for(let cx=0;cx<W;cx++){board[y][cx]=null;}}if(id===2){for(let cx=0;cx<W;cx++){board[y][cx]=null;}for(let ry=0;ry<H;ry++){board[ry][x]=null;}}if(id===3){for(let ry=y-1;ry<=y+1;ry++){for(let cx=x-1;cx<=x+1;cx++){if(ry>=0&&ry<H&&cx>=0&&cx<W){board[ry][cx]=null;}}}}if(id===4){const targetLvl=board[y][x].lvl;for(let ry=0;ry<H;ry++){for(let cx=0;cx<W;cx++){if(board[ry][cx]?.lvl===targetLvl){board[ry][cx]=null;}}}}settle();const result=resolveMerges();checkDragonUnlocks();render();setMessage("POWER USED!","good");if(result.didMerge){gameEl.classList.add("shake");setTimeout(()=>{gameEl.classList.remove("shake");},160);}}
-function initBoard(){updateCellSize();skillUnlocked=loadedSave?.skillUnlocked?[...loadedSave.skillUnlocked]:[false,false];skillCharges=loadedSave?.skillCharges?[...loadedSave.skillCharges]:[0,0,0,0];adBusy=[false,false];activeSkill=null;board=Array.from({length:H},()=>Array(W).fill(null));score=0;gameOver=false;busy=false;highestLvl=1;nextCreature=randCreature();updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();updateSkillsUI();logEvent("Game_Start");if(window.CrazyGames?.SDK?.game?.gameplayStart){try{window.CrazyGames.SDK.gameplayStart();}catch(e){}}}
+function watchAdForSkill(id){closePanel();const i=id-1;if(adBusy[i])return;if(!window.CrazyGames?.SDK?.ad?.requestAd){setMessage("ADS LOCKED","bad");logEvent("ad_unavailable",{skill:id});return;}adBusy[i]=true;updateSkillsUI();window.CrazyGames.SDK.ad.requestAd("rewarded",{adStarted:()=>{logEvent("ad_started",{skill:id});},adFinished:()=>{skillCharges[i]+=3;adBusy[i]=false;logEvent("skill_ad_watched",{skill:id});updateSkillsUI();setMessage("+3 USES ADDED","good");},adError:(error)=>{adBusy[i]=false;updateSkillsUI();setMessage("AD FAILED","bad");logEvent("ad_error",{skill:id,error});}});}
+function attemptRevive(){if(reviveCooldownGames>0){setMessage(`REVIVE IN ${reviveCooldownGames} GAMES`,"bad");return;}watchAdToRevive();}
+function watchAdToRevive(){
+  if(!window.CrazyGames?.SDK?.ad?.requestAd){setMessage("ADS LOCKED","bad");return;}
+  const btn=document.getElementById("reviveBtn");btn.textContent="LOADING AD...";btn.disabled=true;
+  window.CrazyGames.SDK.ad.requestAd("rewarded",{
+    adStarted:()=>{logEvent("revive_ad_started");},
+    adFinished:()=>{
+      reviveCooldownGames=3;
+      let cleared=0;while(board[0].some(c=>c) && cleared<2){board.shift();board.push(Array(W).fill(null));cleared++;}
+      settle();render();
+      document.getElementById("gameover").style.display="none";gameOver=false;busy=false;
+      setMessage("🐲 REVIVED! BOARD CLEARED!","good");
+      if(window.CrazyGames?.SDK?.game?.gameplayStart){try{window.CrazyGames.SDK.gameplayStart();}catch(e){}}
+      logEvent("revived");
+    },
+    adError:(error)=>{
+      btn.textContent="WATCH AD & CONTINUE";btn.disabled=false;setMessage("AD FAILED","bad");logEvent("revive_ad_error",{error});
+    }
+  });
+}
+function useSkill(x,y){const id=activeSkill;activeSkill=null;document.querySelectorAll(".skillBtn").forEach(b=>{b.classList.remove("active");});if(id===4&&!board[y][x]){setMessage("TAP A CREATURE","bad");return;}skillCharges[id-1]--;logEvent("skill_used",{skill:id});updateSkillsUI();if(id===1){for(let cx=0;cx<W;cx++){board[y][cx]=null;}}if(id===2){for(let cx=0;cx<W;cx++){board[y][cx]=null;}for(let ry=0;ry<H;ry++){board[ry][x]=null;}}if(id===3){for(let ry=y-1;ry<=y+1;ry++){for(let cx=x-1;cx<=x+1;cx++){if(ry>=0&&ry<H&&cx>=0&&cx<W){board[ry][cx]=null;}}}}if(id===4){const targetLvl=board[y][x].lvl;for(let ry=0;ry<H;ry++){for(let cx=0;cx<W;cx++){if(board[ry][cx]?.lvl===targetLvl){board[ry][cx]=null;}}}}settle();const result=resolveMerges();checkDragonUnlocks();render();setMessage("POWER USED!","good");if(result.didMerge){gameEl.classList.add("shake");setTimeout(()=>{gameEl.classList.remove("shake");},160);}saveGame();}
+function initBoard(resetSkills=true){
+  updateCellSize();
+  if(reviveCooldownGames>0){reviveCooldownGames--;}
+
+  if(resetSkills){skillUnlocked=[false,false];skillCharges=[0,0,0,0];}
+  adBusy=[false,false,false,false];activeSkill=null; // FIXED 4 SLOTS
+  board=Array.from({length:H},()=>Array(W).fill(null));score=0;gameOver=false;busy=false;highestLvl=1;nextCreature=randCreature();
+  updateHUD();updateNext();setMessage("TAP A COLUMN TO DROP");render();updateSkillsUI();
+  logEvent("Game_Start");
+  if(window.CrazyGames?.SDK?.game?.gameplayStart){try{window.CrazyGames.SDK.gameplayStart();}catch(e){}}
+}
 function updateCellSize(){CELL=gameEl.clientWidth/W;document.documentElement.style.setProperty("--cell",CELL+"px");}
 function randCreature(){const total=CREATURES.reduce((a,b)=>a+b.weight,0);let r=Math.random()*total;for(const c of CREATURES){r-=c.weight;if(r<=0){return{...c};}}return{...CREATURES[0]};}
-function startGame(fromReplay=false){document.getElementById("screen").style.display="none";document.getElementById("topbar").style.display="flex";document.getElementById("gameWrap").style.display="flex";document.getElementById("skills").style.display="flex";document.getElementById("bottombar").style.display="flex";document.getElementById("gameover").style.display="none";if(fromReplay){logEvent("Play_Again");}initBoard();}
+function startGame(fromReplay=false){document.getElementById("screen").style.display="none";document.getElementById("topbar").style.display="flex";document.getElementById("gameWrap").style.display="flex";document.getElementById("skills").style.display="flex";document.getElementById("bottombar").style.display="flex";document.getElementById("gameover").style.display="none";if(fromReplay){logEvent("Play_Again");}initBoard(true);}
 function toggleSound(){soundOn=!soundOn;const icon=soundOn?"🔊":"🔇";document.querySelectorAll(".soundBtn").forEach(el=>{const iconEl=el.querySelector(".soundIcon");if(iconEl){iconEl.textContent=icon;}else{el.textContent=icon;}el.classList.toggle("soundActive",soundOn);});}
 document.querySelectorAll(".soundBtn").forEach(btn=>{btn.addEventListener("click",toggleSound);});
 function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("best").textContent=best;document.getElementById("titleBest").textContent=best;}
@@ -127,52 +147,11 @@ function mergeCells(x1,y1,x2,y2,newLvl){board[y2][x2].lvl=newLvl;if(newLvl>highe
 function settle(){for(let x=0;x<W;x++){let write=H-1;for(let y=H-1;y>=0;y--){if(board[y][x]){if(write!==y){board[write][x]=board[y][x];board[y][x]=null;}write--;}}}}
 function addPressureRow(){if(board[0].some(cell=>cell)){return false;}for(let y=0;y<H-1;y++){board[y]=[...board[y+1]];}const newRow=Array(W).fill(null);for(let x=0;x<W;x++){if(Math.random()<.6){newRow[x]=randCreature();}}board[H-1]=newRow;render();return true;}
 function getEmojiByLvl(lvl){if(lvl<=5){return["","🐜","🪳","🐦","🦎","🐊"][lvl];}const d=lvl-5;if(d===1){return"🐲";}if(d===2){return"🐲👑";}if(d===3){return"🐲👑";}return"🐲🔥";}
-function gameOverFn(){gameOver=true;logEvent("Game_Over",{score,highestLvl});if(score>best){best=score;localStorage.setItem("eatEvolveBest",best);}updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("gameover").style.display="flex";if(window.CrazyGames?.SDK?.game?.gameplayStop){try{window.CrazyGames.SDK.gameplayStop();}catch(e){}}saveGame();}
+function gameOverFn(){gameOver=true;logEvent("Game_Over",{score,highestLvl});if(score>best){best=score;saveGame();}updateHUD();document.getElementById("finalScore").textContent=score;document.getElementById("gameover").style.display="flex";
+document.getElementById("reviveBtn").style.display = reviveCooldownGames>0? "none" : "block";
+document.getElementById("reviveBtn").textContent="WATCH AD & CONTINUE";document.getElementById("reviveBtn").disabled=false;if(window.CrazyGames?.SDK?.game?.gameplayStop){try{window.CrazyGames.SDK.gameplayStop();}catch(e){}}}
 gameEl.addEventListener("pointerdown",e=>{if(gameOver||busy||!board){return;}e.preventDefault();const rect=gameEl.getBoundingClientRect();const rawX=e.clientX-rect.left;const rawY=e.clientY-rect.top;const col=Math.max(0,Math.min(W-1,Math.floor(rawX/CELL)));const row=Math.max(0,Math.min(H-1,Math.floor(rawY/CELL)));if(activeSkill){useSkill(col,row);return;}drop(col);});
-
-// SHARE FUNCTION
-async function shareScore(){
-  const final = Number(score || 0);
-  const shareText =
-    `🐜 I scored ${final.toLocaleString()} in EAT TO EVOLVE: MERGE! 🧬\n\n` +
-    `Can you beat my score?`;
-
-  const shareData = {
-    title: "Eat to Evolve: Merge",
-    text: shareText,
-    url: window.location.href
-  };
-
-  try {
-    if(navigator.share){
-      await navigator.share(shareData);
-      logEvent("score_shared",{score:final,method:"native"});
-      return;
-    }
-
-    if(navigator.clipboard){
-      await navigator.clipboard.writeText(
-        `${shareText}\n${window.location.href}`
-      );
-      setMessage("SHARE TEXT COPIED!","good");
-      logEvent("score_shared",{score:final,method:"clipboard"});
-      return;
-    }
-
-    window.prompt(
-      "Copy your score:",
-      `${shareText}\n${window.location.href}`
-    );
-
-  }catch(e){
-    if(e?.name!== "AbortError"){
-      console.warn("Share failed:",e);
-      setMessage("SHARE FAILED - TRY AGAIN","bad");
-      logEvent("share_error",{score:final});
-    }
-  }
-}
-
+async function shareScore(){const final = Number(score || 0);const shareText = `🐜 I scored ${final.toLocaleString()} in EAT TO EVOLVE: MERGE! 🧬\n\nCan you beat my score?`;const shareData = {title: "Eat to Evolve: Merge",text: shareText,url: window.location.href};try {if(navigator.share){await navigator.share(shareData);logEvent("score_shared",{score:final,method:"native"});return;}if(navigator.clipboard){await navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);setMessage("SHARE TEXT COPIED!","good");logEvent("score_shared",{score:final,method:"clipboard"});return;}window.prompt("Copy your score:",`${shareText}\n${window.location.href}`);}catch(e){if(e?.name!== "AbortError"){console.warn("Share failed:",e);setMessage("SHARE FAILED - TRY AGAIN","bad");logEvent("share_error",{score:final});}}}
 function logEvent(name,data={}){console.log(`[ANALYTICS] ${name}`,data);}
 </script>
 </body>
